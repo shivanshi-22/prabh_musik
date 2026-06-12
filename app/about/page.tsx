@@ -1,677 +1,775 @@
 'use client';
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface StatItem {
-  icon: string;
-  value: string;
-  label: string;
-}
+/* ─────────────────────────────────────────────
+   TYPES
+───────────────────────────────────────────── */
+interface ServiceItem { icon: string; title: string; desc: string }
+interface StepItem    { phase: string; title: string; desc: string }
+interface StatItem    { symbol: string; value: string; label: string }
 
-interface ServiceItem {
-  icon: string;
-  title: string;
-  desc: string;
-}
+/* ─────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────── */
+const SERVICES: ServiceItem[] = [
+  { icon: '◎', title: 'Music Production',    desc: 'Custom production tailored to your artistic identity — from concept to final session file.' },
+  { icon: '≋', title: 'Mixing & Mastering',  desc: 'Industry-standard sound that translates on every speaker, stream, and stage.' },
+  { icon: '◈', title: 'Creative Direction',  desc: 'Shape your visual and sonic identity with clarity, consistency, and intent.' },
+  { icon: '↗', title: 'Artist Development',  desc: 'Long-term strategy, guidance, and growth planning built around your career goals.' },
+];
 
-interface StepItem {
-  num: string;
-  title: string;
-  desc: string;
-}
+const STEPS: StepItem[] = [
+  { phase: 'Phase I',   title: 'DISCOVER', desc: 'Deep-dive into your story, influences, and where you want to go.' },
+  { phase: 'Phase II',  title: 'CREATE',   desc: 'Producing and arranging — turning raw ideas into structured music.' },
+  { phase: 'Phase III', title: 'PERFECT',  desc: 'Mixing, mastering, and obsessing over every detail until it\'s right.' },
+  { phase: 'Phase IV',  title: 'LAUNCH',   desc: 'Release strategy, branding assets, and growth support.' },
+];
 
-// ─── Hooks ────────────────────────────────────────────────────────────────────
-function useInView(threshold = 0.15) {
+const STATS: StatItem[] = [
+  { symbol: '★', value: '100%',      label: 'Commitment to every project' },
+  { symbol: '∞', value: 'UNLIMITED', label: 'Creative possibilities' },
+  { symbol: '◎', value: '1 GOAL',    label: 'Your success, always' },
+  { symbol: '◈', value: 'LONG-TERM', label: 'Partnerships built on trust' },
+];
+
+const TICKER_ITEMS = ['MUSIC', 'IDENTITY', 'LEGACY', 'IMPACT', 'SOUND', 'VISION', 'CRAFT', 'EMOTION'];
+
+/* ─────────────────────────────────────────────
+   INTERSECTION HOOK
+───────────────────────────────────────────── */
+function useInView(threshold = 0.12) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) setInView(true); },
-      { threshold }
-    );
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setInView(true); }, { threshold });
     if (ref.current) obs.observe(ref.current);
     return () => obs.disconnect();
   }, [threshold]);
   return { ref, inView };
 }
 
-// ─── Reveal wrapper ───────────────────────────────────────────────────────────
-function Reveal({
-  children,
-  delay = 0,
-  className = "",
-}: {
+/* ─────────────────────────────────────────────
+   REVEAL WRAPPER
+───────────────────────────────────────────── */
+function Reveal({ children, delay = 0, from = 'bottom' }: {
   children: React.ReactNode;
   delay?: number;
-  className?: string;
+  from?: 'bottom' | 'left' | 'right';
 }) {
   const { ref, inView } = useInView();
+  const tx = from === 'left' ? 'translateX(-32px)' : from === 'right' ? 'translateX(32px)' : 'translateY(32px)';
   return (
-    <div
-      ref={ref}
-      className={className}
-      style={{
-        opacity: inView ? 1 : 0,
-        transform: inView ? "translateY(0)" : "translateY(40px)",
-        transition: `opacity 0.85s cubic-bezier(.16,1,.3,1) ${delay}ms, transform 0.85s cubic-bezier(.16,1,.3,1) ${delay}ms`,
-      }}
-    >
+    <div ref={ref} style={{
+      opacity: inView ? 1 : 0,
+      transform: inView ? 'translate(0)' : tx,
+      transition: `opacity 0.9s cubic-bezier(.16,1,.3,1) ${delay}ms, transform 0.9s cubic-bezier(.16,1,.3,1) ${delay}ms`,
+    }}>
       {children}
     </div>
   );
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-const SERVICES: ServiceItem[] = [
-  {
-    icon: "🎧",
-    title: "Music Production",
-    desc: "Custom production tailored to your artistic identity.",
-  },
-  {
-    icon: "🎛",
-    title: "Mixing & Mastering",
-    desc: "Industry-standard sound that translates everywhere.",
-  },
-  {
-    icon: "💡",
-    title: "Creative Direction",
-    desc: "Shape your visual and musical identity with clarity and purpose.",
-  },
-  {
-    icon: "📈",
-    title: "Artist Development",
-    desc: "Guidance, strategy, and growth planning for long-term success.",
-  },
-];
-
-const STEPS: StepItem[] = [
-  {
-    num: "01",
-    title: "DISCOVER",
-    desc: "Understanding your story, influences, and musical direction.",
-  },
-  {
-    num: "02",
-    title: "CREATE",
-    desc: "Producing, arranging, and bringing your ideas to life with creativity.",
-  },
-  {
-    num: "03",
-    title: "PERFECT",
-    desc: "Mixing, mastering, and polishing every detail to perfection.",
-  },
-  {
-    num: "04",
-    title: "LAUNCH",
-    desc: "Release strategy, branding, and growth support to take your music further.",
-  },
-];
-
-const STATS: StatItem[] = [
-  { icon: "★", value: "100%", label: "Commitment to every project" },
-  { icon: "∞", value: "UNLIMITED", label: "Creative possibilities" },
-  { icon: "◎", value: "1 GOAL", label: "Artist success" },
-  { icon: "◈", value: "LONG-TERM", label: "Collaborations built on trust" },
-];
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function GoldDivider() {
+/* ─────────────────────────────────────────────
+   TICKER MARQUEE
+───────────────────────────────────────────── */
+function Ticker({ reversed = false }: { reversed?: boolean }) {
+  const items = [...TICKER_ITEMS, ...TICKER_ITEMS];
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 0" }}>
-      <div style={{ width: 40, height: 2, background: "var(--gold)" }} />
-      <div style={{ width: 6, height: 6, background: "var(--gold)", transform: "rotate(45deg)" }} />
+    <div style={{
+      overflow: 'hidden',
+      borderTop: '1px solid rgba(212,160,23,0.25)',
+      borderBottom: '1px solid rgba(212,160,23,0.25)',
+      padding: '14px 0',
+      background: 'rgba(212,160,23,0.03)',
+    }}>
+      <div style={{
+        display: 'flex',
+        gap: 0,
+        animation: reversed ? 'tickerR 28s linear infinite' : 'ticker 28s linear infinite',
+        width: 'max-content',
+      }}>
+        {[...items, ...items].map((item, i) => (
+          <span key={i} style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: 13,
+            letterSpacing: '0.32em',
+            color: i % 2 === 0 ? 'rgba(212,160,23,0.9)' : 'rgba(245,240,232,0.2)',
+            paddingRight: 48,
+            whiteSpace: 'nowrap',
+            userSelect: 'none',
+          }}>
+            {item}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
 
-function Tag({ children }: { children: string }) {
+/* ─────────────────────────────────────────────
+   SECTION LABEL
+───────────────────────────────────────────── */
+function Label({ children }: { children: string }) {
   return (
-    <span
-      style={{
-        fontFamily: "var(--font-mono)",
+    <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+      <div style={{ width: 24, height: 1, background: '#d4a017' }} />
+      <span style={{
+        fontFamily: "'Space Mono', monospace",
         fontSize: 10,
-        letterSpacing: "0.22em",
-        color: "var(--gold)",
-        textTransform: "uppercase",
-        display: "block",
-        marginBottom: 12,
-      }}
-    >
-      {children}
-    </span>
+        letterSpacing: '0.26em',
+        color: '#d4a017',
+        textTransform: 'uppercase',
+      }}>{children}</span>
+    </div>
   );
 }
 
-// ─── Section 1 – Hero ─────────────────────────────────────────────────────────
-function HeroSection() {
+/* ─────────────────────────────────────────────
+   GOLD RULE
+───────────────────────────────────────────── */
+function Rule() {
   return (
-    <section
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '20px 0' }}>
+      <div style={{ width: 40, height: 1.5, background: '#d4a017' }} />
+      <div style={{ width: 5, height: 5, background: '#d4a017', transform: 'rotate(45deg)', flexShrink: 0 }} />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   BUTTON
+───────────────────────────────────────────── */
+function GoldBtn({ children, large }: { children: React.ReactNode; large?: boolean }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <button
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
       style={{
-        minHeight: "100vh",
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        alignItems: "center",
-        gap: 64,
-        padding: "120px 80px",
-        position: "relative",
-        overflow: "hidden",
+        fontFamily: "'Space Mono', monospace",
+        fontSize: large ? 12 : 11,
+        letterSpacing: '0.22em',
+        textTransform: 'uppercase',
+        color: hov ? '#d4a017' : '#080808',
+        background: hov ? 'transparent' : '#d4a017',
+        border: '1.5px solid #d4a017',
+        padding: large ? '18px 56px' : '14px 36px',
+        cursor: 'pointer',
+        transition: 'all 0.25s ease',
+        outline: 'none',
+        display: 'inline-block',
       }}
     >
-      {/* Ambient glow */}
-      <div
-        style={{
-          position: "absolute",
-          top: -200,
-          left: -200,
-          width: 700,
-          height: 700,
-          background: "radial-gradient(circle, rgba(212,160,23,0.08) 0%, transparent 70%)",
-          pointerEvents: "none",
-        }}
-      />
-      {/* Left */}
-      <div>
+      {children}
+    </button>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+function HeroSection({ isMobile }: { isMobile: boolean }) {
+  return (
+    <section style={{
+      minHeight: '100vh',
+      display: 'grid',
+      gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Left panel */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        padding: isMobile ? '80px 28px 48px' : '0 72px 72px',
+        paddingTop: isMobile ? 80 : 0,
+        position: 'relative',
+        zIndex: 2,
+        borderRight: isMobile ? 'none' : '1px solid rgba(212,160,23,0.15)',
+      }}>
         <Reveal delay={0}>
-          <Tag>About Prabh Musik</Tag>
+          <Label>About Prabh Musik</Label>
         </Reveal>
-        <Reveal delay={100}>
-          <h1
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(52px, 7vw, 96px)",
-              lineHeight: 0.92,
-              letterSpacing: "-0.02em",
-              margin: "0 0 24px",
-              color: "var(--white)",
-            }}
-          >
-            MUSIC
-            <br />
-            THAT
-            <br />
-            CREATES{" "}
-            <em
-              style={{
-                fontStyle: "normal",
-                color: "var(--gold)",
-                WebkitTextStroke: "0px",
-              }}
-            >
-              IMPACT.
-            </em>
+        <Reveal delay={80}>
+          <h1 style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: isMobile ? 'clamp(72px, 18vw, 96px)' : 'clamp(80px, 9vw, 136px)',
+            lineHeight: 0.88,
+            letterSpacing: '-0.01em',
+            color: '#f5f0e8',
+            margin: '0 0 8px',
+          }}>
+            MUSIC<br />
+            THAT<br />
+            <span style={{ color: '#d4a017', WebkitTextStroke: isMobile ? '0px' : '0px' }}>CREATES</span>
+          </h1>
+          <h1 style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: isMobile ? 'clamp(72px, 18vw, 96px)' : 'clamp(80px, 9vw, 136px)',
+            lineHeight: 0.88,
+            letterSpacing: '-0.01em',
+            color: 'transparent',
+            WebkitTextStroke: '1.5px rgba(212,160,23,0.6)',
+            margin: '0 0 40px',
+          }}>
+            IMPACT.
           </h1>
         </Reveal>
-        <Reveal delay={200}>
-          <GoldDivider />
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 16,
-              lineHeight: 1.75,
-              color: "var(--muted)",
-              maxWidth: 420,
-              marginBottom: 40,
-            }}
-          >
-            We help artists discover their sound, build their identity, and
-            create music that leaves a lasting impression. From production and
-            mixing to branding and artist development, every project is
-            approached with dedication, creativity, and a vision for long-term
-            success.
+        <Reveal delay={180}>
+          <Rule />
+          <p style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 18,
+            lineHeight: 1.8,
+            color: 'rgba(245,240,232,0.55)',
+            maxWidth: 400,
+            marginBottom: 44,
+          }}>
+            We help artists discover their sound, build their identity, and create
+            music that leaves a lasting impression.
           </p>
         </Reveal>
-        <Reveal delay={300}>
-          <button
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "var(--black)",
-              background: "var(--gold)",
-              border: "none",
-              padding: "14px 32px",
-              cursor: "pointer",
-              position: "relative",
-              overflow: "hidden",
-              transition: "transform 0.2s",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.transform = "scale(1.03)")
-            }
-            onMouseLeave={(e) =>
-              ((e.currentTarget as HTMLButtonElement).style.transform = "scale(1)")
-            }
-          >
-            START YOUR JOURNEY
-          </button>
+        <Reveal delay={260}>
+          <GoldBtn>Start Your Journey</GoldBtn>
         </Reveal>
+        {/* Vertical text */}
+        {!isMobile && (
+          <div style={{
+            position: 'absolute',
+            right: -1,
+            top: '50%',
+            transform: 'translateY(-50%) rotate(90deg)',
+            transformOrigin: 'center',
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 9,
+            letterSpacing: '0.3em',
+            color: 'rgba(212,160,23,0.35)',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+          }}>
+            Prabh Musik Studio · Est. 2020
+          </div>
+        )}
       </div>
 
-      {/* Right – image placeholder styled as studio photo */}
-      <Reveal delay={200}>
-        <div
+      {/* Right panel — image full bleed */}
+      <div style={{
+        position: isMobile ? 'relative' : 'sticky',
+        top: 0,
+        height: isMobile ? '60vw' : '100vh',
+        overflow: 'hidden',
+        borderRadius: 0,
+      }}>
+        <img
+          src="/about_1.png"
+          alt="Prabh Musik Studio"
           style={{
-            position: "relative",
-            aspectRatio: "4/3",
-            background:
-              "linear-gradient(135deg, #1a1408 0%, #0d0d0d 100%)",
-            border: "1px solid rgba(212,160,23,0.18)",
-            overflow: "hidden",
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            display: 'block',
+            filter: 'contrast(1.06) brightness(0.88)',
+            borderRadius: 0,
           }}
-        >
-          {/* Corner accents */}
-          {[
-            { top: 0, left: 0 },
-            { top: 0, right: 0 },
-            { bottom: 0, left: 0 },
-            { bottom: 0, right: 0 },
-          ].map((pos, i) => (
-            <div
-              key={i}
-              style={{
-                position: "absolute",
-                width: 24,
-                height: 24,
-                borderTop: i < 2 ? "2px solid var(--gold)" : "none",
-                borderBottom: i >= 2 ? "2px solid var(--gold)" : "none",
-                borderLeft: i % 2 === 0 ? "2px solid var(--gold)" : "none",
-                borderRight: i % 2 === 1 ? "2px solid var(--gold)" : "none",
-                ...pos,
-              }}
-            />
-          ))}
-          {/* Studio ambience overlay */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background:
-                "radial-gradient(ellipse at 60% 40%, rgba(212,160,23,0.12) 0%, transparent 65%)",
-            }}
-          />
-          {/* Icon placeholder */}
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 56,
-                opacity: 0.2,
-              }}
-            >
-              🎹
-            </div>
-            <p
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 10,
-                letterSpacing: "0.2em",
-                color: "rgba(212,160,23,0.4)",
-                textTransform: "uppercase",
-              }}
-            >
-              Studio · Prabh Musik
+        />
+        {/* Vignette overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: isMobile
+            ? 'linear-gradient(to top, rgba(8,8,8,0.7) 0%, transparent 50%)'
+            : 'linear-gradient(to right, rgba(8,8,8,0.5) 0%, transparent 40%), linear-gradient(to top, rgba(8,8,8,0.4) 0%, transparent 40%)',
+        }} />
+        {/* Corner label */}
+        <div style={{
+          position: 'absolute',
+          bottom: 28,
+          right: 28,
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 9,
+          letterSpacing: '0.24em',
+          color: 'rgba(212,160,23,0.5)',
+          textTransform: 'uppercase',
+        }}>
+          Studio · Mumbai
+        </div>
+        {/* Gold frame accent removed */}
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   VISION
+───────────────────────────────────────────── */
+function VisionSection({ isMobile }: { isMobile: boolean }) {
+  return (
+    <section style={{
+      padding: isMobile ? '80px 28px' : '120px 72px',
+      display: 'grid',
+      gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+      gap: isMobile ? 48 : 80,
+      alignItems: 'center',
+      maxWidth: 1400,
+      margin: '0 auto',
+    }}>
+      {/* Big quote / left */}
+      <Reveal from="left" delay={0}>
+        <div style={{ position: 'relative' }}>
+          {/* Huge decorative P */}
+          <div style={{
+            position: 'absolute',
+            top: -20,
+            left: -20,
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: isMobile ? 200 : 280,
+            lineHeight: 1,
+            color: 'rgba(212,160,23,0.05)',
+            pointerEvents: 'none',
+            userSelect: 'none',
+            zIndex: 0,
+          }}>P</div>
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <Label>Our Vision</Label>
+            <h2 style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: isMobile ? 'clamp(44px, 12vw, 72px)' : 'clamp(48px, 5.5vw, 80px)',
+              lineHeight: 0.92,
+              letterSpacing: '-0.01em',
+              color: '#f5f0e8',
+              marginBottom: 8,
+            }}>
+              MUSIC IS MORE<br />THAN SOUND
+            </h2>
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontStyle: 'italic',
+              fontSize: isMobile ? 20 : 24,
+              color: '#d4a017',
+              letterSpacing: '0.04em',
+              marginBottom: 28,
+            }}>
+              — Emotion. Identity. Influence.
             </p>
+            <Rule />
           </div>
         </div>
       </Reveal>
+
+      {/* Right body */}
+      <Reveal from="right" delay={120}>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: isMobile ? 17 : 19,
+          lineHeight: 1.9,
+          color: 'rgba(245,240,232,0.6)',
+          marginBottom: 24,
+        }}>
+          At Prabh Musik, every artist is treated as a unique creative voice.
+          We focus on understanding their inspirations, style, personality, and
+          goals to create music that feels authentic and meaningful.
+        </p>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: isMobile ? 17 : 19,
+          lineHeight: 1.9,
+          color: 'rgba(245,240,232,0.35)',
+          marginBottom: 36,
+        }}>
+          The objective isn't simply to make songs. It's to create moments
+          people remember for the rest of their lives.
+        </p>
+        <div style={{
+          padding: '24px 28px',
+          borderLeft: '2px solid #d4a017',
+          background: 'rgba(212,160,23,0.04)',
+        }}>
+          <p style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontStyle: 'italic',
+            fontSize: 22,
+            lineHeight: 1.6,
+            color: 'rgba(245,240,232,0.8)',
+            margin: 0,
+          }}>
+            "Sound is the last sense to leave us. Make it count."
+          </p>
+          <span style={{
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 10,
+            letterSpacing: '0.22em',
+            color: 'rgba(212,160,23,0.6)',
+            textTransform: 'uppercase',
+            marginTop: 12,
+            display: 'block',
+          }}>— Prabh</span>
+        </div>
+      </Reveal>
     </section>
   );
 }
 
-// ─── Section 2 – Vision ───────────────────────────────────────────────────────
-function VisionSection() {
+/* ─────────────────────────────────────────────
+   SERVICES
+───────────────────────────────────────────── */
+function ServicesSection({ isMobile }: { isMobile: boolean }) {
   return (
-    <section
-      style={{
-        padding: "100px 80px",
-        display: "grid",
-        gridTemplateColumns: "auto 1fr",
-        gap: 80,
-        alignItems: "center",
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Gold vertical bar */}
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: 3,
-          background: "linear-gradient(to bottom, transparent, var(--gold), transparent)",
-        }}
-      />
-      {/* P Logo */}
-      <Reveal delay={0}>
-        <div
-          style={{
-            width: 140,
-            height: 140,
-            border: "2px solid rgba(212,160,23,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            position: "relative",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              inset: 8,
-              border: "1px solid rgba(212,160,23,0.15)",
-            }}
-          />
-          <span
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: 72,
-              color: "var(--gold)",
-              lineHeight: 1,
-            }}
-          >
-            P
-          </span>
-        </div>
-      </Reveal>
+    <section style={{
+      padding: isMobile ? '80px 28px' : '100px 72px',
+      background: 'rgba(212,160,23,0.018)',
+      borderTop: '1px solid rgba(255,255,255,0.04)',
+      borderBottom: '1px solid rgba(255,255,255,0.04)',
+    }}>
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+        <Reveal>
+          <div style={{
+            display: 'flex',
+            alignItems: isMobile ? 'flex-start' : 'flex-end',
+            justifyContent: 'space-between',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: 24,
+            marginBottom: 72,
+          }}>
+            <div>
+              <Label>What We Do</Label>
+              <h2 style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: isMobile ? 'clamp(48px, 12vw, 72px)' : 'clamp(52px, 5.5vw, 76px)',
+                lineHeight: 0.9,
+                color: '#f5f0e8',
+                letterSpacing: '-0.01em',
+              }}>
+                EVERYTHING ARTISTS<br />NEED, UNDER ONE ROOF
+              </h2>
+            </div>
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 16,
+              lineHeight: 1.8,
+              color: 'rgba(245,240,232,0.45)',
+              maxWidth: 280,
+              flexShrink: 0,
+            }}>
+              Four disciplines. One studio. A complete artist support system.
+            </p>
+          </div>
+        </Reveal>
 
-      <div>
-        <Reveal delay={0}>
-          <Tag>Our Vision</Tag>
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(32px, 5vw, 60px)",
-              letterSpacing: "-0.01em",
-              color: "var(--white)",
-              margin: "0 0 8px",
-            }}
-          >
-            MUSIC IS MORE THAN SOUND
-          </h2>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(14px, 2vw, 18px)",
-              letterSpacing: "0.08em",
-              color: "var(--gold)",
-              textTransform: "uppercase",
-              margin: "0 0 24px",
-            }}
-          >
-            Music is Emotion, Identity, and Influence.
-          </p>
-        </Reveal>
-        <Reveal delay={150}>
-          <GoldDivider />
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 16,
-              lineHeight: 1.8,
-              color: "var(--muted)",
-              maxWidth: 560,
-              marginBottom: 16,
-            }}
-          >
-            At Prabh Musik, every artist is treated as a unique creative voice.
-            We focus on understanding their inspirations, style, personality,
-            and goals to create music that feels authentic and meaningful.
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: 16,
-              lineHeight: 1.8,
-              color: "rgba(255,255,255,0.45)",
-              maxWidth: 560,
-            }}
-          >
-            The objective isn't simply to make songs. It's to create moments
-            people remember.
-          </p>
-        </Reveal>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(4, 1fr)',
+          gap: 1,
+          border: '1px solid rgba(212,160,23,0.15)',
+        }}>
+          {SERVICES.map((s, i) => (
+            <ServiceCard key={s.title} item={s} index={i} isMobile={isMobile} />
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-// ─── Section 3 – Services ─────────────────────────────────────────────────────
-function ServicesSection() {
+function ServiceCard({ item, index, isMobile }: { item: ServiceItem; index: number; isMobile: boolean }) {
+  const [hov, setHov] = useState(false);
   return (
-    <section style={{ padding: "100px 80px" }}>
-      <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <Tag>What We Do</Tag>
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(28px, 4.5vw, 56px)",
-              letterSpacing: "-0.01em",
-              color: "var(--white)",
-              margin: 0,
-            }}
-          >
-            EVERYTHING ARTISTS NEED
-            <br />
-            UNDER ONE ROOF
-          </h2>
-          <GoldDivider
-            
-          />
-        </div>
-      </Reveal>
-
+    <Reveal delay={index * 90}>
       <div
+        onMouseEnter={() => setHov(true)}
+        onMouseLeave={() => setHov(false)}
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 20,
+          padding: isMobile ? '40px 28px' : '52px 36px',
+          borderRight: !isMobile && index < 3 ? '1px solid rgba(212,160,23,0.15)' : 'none',
+          background: hov ? 'rgba(212,160,23,0.07)' : 'transparent',
+          transition: 'background 0.3s',
+          position: 'relative',
+          cursor: 'default',
+          overflow: 'hidden',
         }}
       >
-        {SERVICES.map((s, i) => (
-          <Reveal key={s.title} delay={i * 80}>
-            <div
-              style={{
-                border: "1px solid rgba(212,160,23,0.18)",
-                padding: "36px 28px",
-                background: "rgba(255,255,255,0.02)",
-                position: "relative",
-                cursor: "default",
-                transition: "border-color 0.3s, background 0.3s, transform 0.3s",
-              }}
-              onMouseEnter={(e) => {
-                const el = e.currentTarget as HTMLDivElement;
-                el.style.borderColor = "rgba(212,160,23,0.6)";
-                el.style.background = "rgba(212,160,23,0.05)";
-                el.style.transform = "translateY(-6px)";
-              }}
-              onMouseLeave={(e) => {
-                const el = e.currentTarget as HTMLDivElement;
-                el.style.borderColor = "rgba(212,160,23,0.18)";
-                el.style.background = "rgba(255,255,255,0.02)";
-                el.style.transform = "translateY(0)";
-              }}
-            >
-              {/* Top-left corner accent */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: -1,
-                  left: -1,
-                  width: 16,
-                  height: 16,
-                  background: "var(--gold)",
-                  opacity: 0.6,
-                }}
-              />
-              <div
-                style={{
-                  width: 52,
-                  height: 52,
-                  background: "rgba(212,160,23,0.1)",
-                  border: "1px solid rgba(212,160,23,0.3)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 22,
-                  marginBottom: 20,
-                }}
-              >
-                {s.icon}
-              </div>
-              <h3
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: 16,
-                  letterSpacing: "0.06em",
-                  color: "var(--white)",
-                  margin: "0 0 12px",
-                }}
-              >
-                {s.title}
-              </h3>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: 13,
-                  lineHeight: 1.7,
-                  color: "var(--muted)",
-                  margin: 0,
-                }}
-              >
-                {s.desc}
+        {/* Top accent bar */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: 2,
+          background: '#d4a017',
+          transform: hov ? 'scaleX(1)' : 'scaleX(0)',
+          transformOrigin: 'left',
+          transition: 'transform 0.45s cubic-bezier(.16,1,.3,1)',
+        }} />
+        <div style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: 40,
+          color: hov ? '#d4a017' : 'rgba(212,160,23,0.35)',
+          marginBottom: 28,
+          lineHeight: 1,
+          transition: 'color 0.3s',
+        }}>
+          {item.icon}
+        </div>
+        <h3 style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: 22,
+          letterSpacing: '0.1em',
+          color: '#f5f0e8',
+          marginBottom: 16,
+        }}>
+          {item.title}
+        </h3>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 15,
+          lineHeight: 1.85,
+          color: 'rgba(245,240,232,0.5)',
+          margin: 0,
+        }}>
+          {item.desc}
+        </p>
+        <div style={{
+          position: 'absolute',
+          bottom: 28, right: 28,
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 10,
+          letterSpacing: '0.2em',
+          color: 'rgba(212,160,23,0.25)',
+          transition: 'color 0.3s',
+        }}>
+          {String(index + 1).padStart(2, '0')}
+        </div>
+      </div>
+    </Reveal>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   PROCESS
+───────────────────────────────────────────── */
+function ProcessSection({ isMobile }: { isMobile: boolean }) {
+  return (
+    <section style={{ padding: isMobile ? '80px 28px' : '100px 72px' }}>
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+        <Reveal>
+          <Label>Our Process</Label>
+          <h2 style={{
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize: isMobile ? 'clamp(48px, 12vw, 72px)' : 'clamp(52px, 5.5vw, 76px)',
+            lineHeight: 0.9,
+            color: '#f5f0e8',
+            letterSpacing: '-0.01em',
+            marginBottom: 72,
+          }}>
+            HOW WE WORK
+          </h2>
+        </Reveal>
+
+        {isMobile ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {STEPS.map((step, i) => (
+              <Reveal key={step.phase} delay={i * 80}>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '80px 1fr',
+                  gap: 24,
+                  paddingBottom: 48,
+                  position: 'relative',
+                }}>
+                  <div>
+                    <div style={{
+                      width: 48, height: 48,
+                      border: '1.5px solid #d4a017',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: 10,
+                      color: '#d4a017',
+                      letterSpacing: '0.12em',
+                    }}>
+                      {String(i + 1).padStart(2, '0')}
+                    </div>
+                    {i < STEPS.length - 1 && (
+                      <div style={{
+                        width: 1, height: 'calc(100% - 24px)',
+                        background: 'rgba(212,160,23,0.2)',
+                        margin: '8px auto 0',
+                      }} />
+                    )}
+                  </div>
+                  <div style={{ paddingTop: 8 }}>
+                    <span style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: 9,
+                      letterSpacing: '0.22em',
+                      color: 'rgba(212,160,23,0.5)',
+                      textTransform: 'uppercase',
+                      display: 'block',
+                      marginBottom: 8,
+                    }}>{step.phase}</span>
+                    <h4 style={{
+                      fontFamily: "'Bebas Neue', sans-serif",
+                      fontSize: 28,
+                      letterSpacing: '0.1em',
+                      color: '#f5f0e8',
+                      marginBottom: 10,
+                    }}>{step.title}</h4>
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 15,
+                      lineHeight: 1.8,
+                      color: 'rgba(245,240,232,0.5)',
+                    }}>{step.desc}</p>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        ) : (
+          <div style={{ position: 'relative' }}>
+            {/* Connector */}
+            <div style={{
+              position: 'absolute',
+              top: 32,
+              left: '12.5%', right: '12.5%',
+              height: 1,
+              background: 'linear-gradient(to right, transparent, rgba(212,160,23,0.4) 10%, rgba(212,160,23,0.4) 90%, transparent)',
+            }} />
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: 24,
+            }}>
+              {STEPS.map((step, i) => (
+                <Reveal key={step.phase} delay={i * 100}>
+                  <div style={{ paddingTop: 0 }}>
+                    {/* Node */}
+                    <div style={{
+                      width: 64, height: 64,
+                      border: '1.5px solid #d4a017',
+                      background: '#080808',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      marginBottom: 32,
+                      position: 'relative',
+                      zIndex: 2,
+                    }}>
+                      <span style={{
+                        fontFamily: "'Bebas Neue', sans-serif",
+                        fontSize: 24,
+                        color: '#d4a017',
+                        lineHeight: 1,
+                      }}>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <span style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: 9,
+                      letterSpacing: '0.22em',
+                      color: 'rgba(212,160,23,0.5)',
+                      textTransform: 'uppercase',
+                      display: 'block',
+                      marginBottom: 10,
+                    }}>{step.phase}</span>
+                    <h4 style={{
+                      fontFamily: "'Bebas Neue', sans-serif",
+                      fontSize: 30,
+                      letterSpacing: '0.1em',
+                      color: '#f5f0e8',
+                      marginBottom: 14,
+                    }}>{step.title}</h4>
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 15,
+                      lineHeight: 1.85,
+                      color: 'rgba(245,240,232,0.48)',
+                    }}>{step.desc}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   STATS / SUCCESS
+───────────────────────────────────────────── */
+function SuccessSection({ isMobile }: { isMobile: boolean }) {
+  return (
+    <section style={{
+      padding: isMobile ? '80px 28px' : '100px 72px',
+      background: 'rgba(212,160,23,0.018)',
+      borderTop: '1px solid rgba(255,255,255,0.04)',
+      borderBottom: '1px solid rgba(255,255,255,0.04)',
+    }}>
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+        {/* Header row */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+          gap: isMobile ? 40 : 80,
+          alignItems: 'flex-end',
+          marginBottom: 80,
+        }}>
+          <Reveal from="left">
+            <div>
+              <Label>Built for Success</Label>
+              <h2 style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: isMobile ? 'clamp(48px, 12vw, 72px)' : 'clamp(52px, 5.5vw, 76px)',
+                lineHeight: 0.9,
+                color: '#f5f0e8',
+                letterSpacing: '-0.01em',
+                marginBottom: 8,
+              }}>
+                WE BUILD<br />CAREERS,<br />
+                <span style={{
+                  color: 'transparent',
+                  WebkitTextStroke: '1.5px rgba(212,160,23,0.55)',
+                }}>
+                  NOT JUST SONGS.
+                </span>
+              </h2>
+            </div>
+          </Reveal>
+          <Reveal from="right" delay={100}>
+            <div>
+              <Rule />
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: isMobile ? 17 : 19,
+                lineHeight: 1.9,
+                color: 'rgba(245,240,232,0.55)',
+                marginBottom: 20,
+              }}>
+                Success isn't measured by delivering a track. It's measured by
+                helping artists build careers. Every project receives complete
+                attention, dedication, and creative commitment.
+              </p>
+              <p style={{
+                fontFamily: "'Bebas Neue', sans-serif",
+                fontSize: 14,
+                letterSpacing: '0.2em',
+                color: '#d4a017',
+              }}>
+                WHEN ARTISTS GROW — WE GROW TOGETHER.
               </p>
             </div>
           </Reveal>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ─── Section 4 – Process ──────────────────────────────────────────────────────
-function ProcessSection() {
-  return (
-    <section
-      style={{
-        padding: "80px 80px 100px",
-        background: "rgba(212,160,23,0.02)",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
-      }}
-    >
-      <Reveal>
-        <div style={{ textAlign: "center", marginBottom: 64 }}>
-          <Tag>Our Process</Tag>
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(28px, 4vw, 52px)",
-              letterSpacing: "-0.01em",
-              color: "var(--white)",
-              margin: 0,
-            }}
-          >
-            HOW WE WORK
-          </h2>
-          <GoldDivider />
         </div>
-      </Reveal>
 
-      <div style={{ position: "relative" }}>
-        {/* Connector line */}
-        <div
-          style={{
-            position: "absolute",
-            top: 36,
-            left: "10%",
-            right: "10%",
-            height: 1,
-            background:
-              "linear-gradient(to right, transparent, rgba(212,160,23,0.3), rgba(212,160,23,0.3), transparent)",
-          }}
-        />
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: 20,
-            position: "relative",
-          }}
-        >
-          {STEPS.map((step, i) => (
-            <Reveal key={step.num} delay={i * 100}>
-              <div style={{ textAlign: "center", padding: "0 16px" }}>
-                <div
-                  style={{
-                    width: 72,
-                    height: 72,
-                    border: "2px solid var(--gold)",
-                    margin: "0 auto 24px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "var(--black)",
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 4,
-                      background: "rgba(212,160,23,0.08)",
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: 22,
-                      color: "var(--gold)",
-                      lineHeight: 1,
-                    }}
-                  >
-                    {step.num}
-                  </span>
-                </div>
-                <h4
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: 15,
-                    letterSpacing: "0.1em",
-                    color: "var(--white)",
-                    margin: "0 0 10px",
-                  }}
-                >
-                  {step.title}
-                </h4>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: 13,
-                    lineHeight: 1.7,
-                    color: "var(--muted)",
-                    margin: 0,
-                  }}
-                >
-                  {step.desc}
-                </p>
-              </div>
+        {/* Stats */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+          gap: 1,
+          border: '1px solid rgba(212,160,23,0.15)',
+        }}>
+          {STATS.map((stat, i) => (
+            <Reveal key={stat.value} delay={i * 70}>
+              <StatCard item={stat} index={i} isMobile={isMobile} last={i === STATS.length - 1} />
             </Reveal>
           ))}
         </div>
@@ -680,550 +778,342 @@ function ProcessSection() {
   );
 }
 
-// ─── Section 5 – Long-term success ───────────────────────────────────────────
-function SuccessSection() {
+function StatCard({ item, index, isMobile, last }: { item: StatItem; index: number; isMobile: boolean; last: boolean }) {
+  const [hov, setHov] = useState(false);
   return (
-    <section style={{ padding: "100px 80px" }}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 80,
-          alignItems: "center",
-          marginBottom: 80,
-        }}
-      >
-        {/* Placeholder concert image */}
-        <Reveal delay={0}>
-          <div
-            style={{
-              aspectRatio: "4/3",
-              background:
-                "linear-gradient(135deg, #1a0a00 0%, #3d1f00 50%, #1a0a00 100%)",
-              border: "1px solid rgba(212,160,23,0.2)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div
+    <div
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        padding: isMobile ? '40px 24px' : '56px 40px',
+        borderRight: !isMobile && !last ? '1px solid rgba(212,160,23,0.15)' : (isMobile && index % 2 === 0 ? '1px solid rgba(212,160,23,0.15)' : 'none'),
+        textAlign: 'center',
+        background: hov ? 'rgba(212,160,23,0.06)' : 'transparent',
+        transition: 'background 0.3s',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      <div style={{
+        position: 'absolute',
+        bottom: 0, left: 0, right: 0,
+        height: 2,
+        background: '#d4a017',
+        transform: hov ? 'scaleX(1)' : 'scaleX(0)',
+        transition: 'transform 0.4s ease',
+      }} />
+      <div style={{
+        fontFamily: "'Bebas Neue', sans-serif",
+        fontSize: 28,
+        color: 'rgba(212,160,23,0.5)',
+        marginBottom: 16,
+        lineHeight: 1,
+      }}>{item.symbol}</div>
+      <div style={{
+        fontFamily: "'Bebas Neue', sans-serif",
+        fontSize: isMobile ? 'clamp(22px, 8vw, 36px)' : 'clamp(28px, 3vw, 44px)',
+        color: '#d4a017',
+        letterSpacing: '0.02em',
+        marginBottom: 14,
+        lineHeight: 1,
+      }}>{item.value}</div>
+      <div style={{
+        fontFamily: "'Space Mono', monospace",
+        fontSize: 9,
+        letterSpacing: '0.24em',
+        color: 'rgba(212,160,23,0.7)',
+        textTransform: 'uppercase',
+        lineHeight: 1.9,
+      }}>{item.label}</div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   FOUNDER
+───────────────────────────────────────────── */
+function FounderSection({ isMobile }: { isMobile: boolean }) {
+  return (
+    <section style={{ padding: isMobile ? '80px 28px' : '100px 72px' }}>
+      <div style={{
+        maxWidth: 1400,
+        margin: '0 auto',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+        gap: 0,
+        border: '1px solid rgba(212,160,23,0.18)',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Gold top accent */}
+        <div style={{
+          position: 'absolute',
+          top: 0, left: '20%', right: '20%',
+          height: 2,
+          background: 'linear-gradient(to right, transparent, #d4a017, transparent)',
+        }} />
+
+        {/* Photo */}
+        <Reveal from="left">
+          <div style={{
+            aspectRatio: isMobile ? '4/3' : '3/4',
+            overflow: 'hidden',
+            position: 'relative',
+          }}>
+            <img
+              src="/about_5.png"
+              alt="Prabh"
               style={{
-                position: "absolute",
-                inset: 0,
-                background:
-                  "radial-gradient(ellipse at 50% 30%, rgba(212,100,0,0.35) 0%, transparent 65%)",
+                width: '100%', height: '100%',
+                objectFit: 'cover',
+                objectPosition: '50% 20%',
+                display: 'block',
+                filter: 'contrast(1.06) brightness(0.92)',
+                transform: 'translateY(6px)',
               }}
             />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-              }}
-            >
-              <div style={{ fontSize: 64, opacity: 0.25 }}>🎤</div>
-              <p
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  letterSpacing: "0.2em",
-                  color: "rgba(212,160,23,0.35)",
-                  textTransform: "uppercase",
-                }}
-              >
-                Live · On Stage
-              </p>
-            </div>
-            {/* Film grain overlay */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                backgroundImage:
-                  "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E\")",
-                opacity: 0.4,
-              }}
-            />
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: isMobile
+                ? 'linear-gradient(to top, rgba(8,8,8,0.6) 0%, transparent 50%)'
+                : 'linear-gradient(to right, transparent 60%, rgba(8,8,8,0.5) 100%)',
+            }} />
           </div>
         </Reveal>
 
         {/* Text */}
-        <div>
-          <Reveal delay={0}>
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                background: "rgba(212,160,23,0.1)",
-                border: "1px solid rgba(212,160,23,0.3)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 22,
-                marginBottom: 24,
-              }}
-            >
-              ◈
-            </div>
-            <h2
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(30px, 4vw, 52px)",
-                letterSpacing: "-0.01em",
-                color: "var(--white)",
-                margin: "0 0 8px",
-                lineHeight: 1.05,
-              }}
-            >
-              BUILT FOR
-              <br />
-              LONG-TERM SUCCESS
+        <div style={{
+          padding: isMobile ? '48px 0 0' : '72px 64px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          borderLeft: isMobile ? 'none' : '1px solid rgba(212,160,23,0.15)',
+        }}>
+          <Reveal from="right" delay={0}>
+            <Label>Founder</Label>
+            <h2 style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: isMobile ? 'clamp(56px, 15vw, 80px)' : 'clamp(60px, 6vw, 88px)',
+              lineHeight: 0.88,
+              letterSpacing: '-0.02em',
+              color: '#f5f0e8',
+              marginBottom: 4,
+            }}>
+              MEET<br />PRABH
             </h2>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: 14,
-                letterSpacing: "0.1em",
-                color: "var(--gold)",
-                textTransform: "uppercase",
-                margin: "0 0 24px",
-              }}
-            >
-              We Build Careers, Not Just Songs.
+            <p style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: 14,
+              letterSpacing: '0.18em',
+              color: '#d4a017',
+              textTransform: 'uppercase',
+              marginBottom: 36,
+            }}>
+              Music Producer · Creative Director
             </p>
           </Reveal>
-          <Reveal delay={150}>
-            <GoldDivider />
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: 15,
-                lineHeight: 1.85,
-                color: "var(--muted)",
-                maxWidth: 480,
-                marginBottom: 28,
-              }}
-            >
-              For us, success isn't measured by delivering a track. It's
-              measured by helping artists build careers. Every project receives
-              complete attention, dedication, and creative commitment because
-              meaningful music requires more than technical expertise—it
-              requires partnership.
-            </p>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: 12,
-                letterSpacing: "0.15em",
-                color: "var(--gold)",
-                textTransform: "uppercase",
-              }}
-            >
-              When Artists Grow, We Grow Together.
-            </p>
-          </Reveal>
-        </div>
-      </div>
-
-      {/* Stats row */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: 2,
-        }}
-      >
-        {STATS.map((stat, i) => (
-          <Reveal key={stat.value} delay={i * 80}>
-            <div
-              style={{
-                border: "1px solid rgba(212,160,23,0.18)",
-                padding: "36px 24px",
-                textAlign: "center",
-                background: "rgba(255,255,255,0.02)",
-                transition: "background 0.3s",
-              }}
-              onMouseEnter={(e) =>
-                ((e.currentTarget as HTMLDivElement).style.background =
-                  "rgba(212,160,23,0.06)")
-              }
-              onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLDivElement).style.background =
-                  "rgba(255,255,255,0.02)")
-              }
-            >
-              <div
-                style={{
-                  fontSize: 22,
-                  color: "var(--gold)",
-                  marginBottom: 12,
-                  opacity: 0.7,
-                }}
-              >
-                {stat.icon}
-              </div>
-              <div
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "clamp(20px, 2.5vw, 30px)",
-                  color: "var(--gold)",
-                  letterSpacing: "0.04em",
-                  marginBottom: 8,
-                }}
-              >
-                {stat.value}
-              </div>
-              <div
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  letterSpacing: "0.18em",
-                  color: "var(--muted)",
-                  textTransform: "uppercase",
-                }}
-              >
-                {stat.label}
-              </div>
-            </div>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ─── Section 6 – Meet Prabh ───────────────────────────────────────────────────
-function FounderSection() {
-  return (
-    <section
-      style={{
-        padding: "100px 80px",
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-      }}
-    >
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: 80,
-          alignItems: "center",
-          border: "1px solid rgba(212,160,23,0.15)",
-          padding: "72px 64px",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        {/* background glow */}
-        <div
-          style={{
-            position: "absolute",
-            right: -100,
-            top: -100,
-            width: 500,
-            height: 500,
-            background:
-              "radial-gradient(circle, rgba(212,160,23,0.06) 0%, transparent 65%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        {/* Left text */}
-        <div>
-          <Reveal delay={0}>
-            <Tag>Founder</Tag>
-            <h2
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "clamp(40px, 5vw, 68px)",
-                letterSpacing: "-0.02em",
-                color: "var(--white)",
-                margin: "0 0 6px",
-              }}
-            >
-              MEET PRABH
-            </h2>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: 14,
-                letterSpacing: "0.12em",
-                color: "var(--gold)",
-                textTransform: "uppercase",
-                marginBottom: 28,
-              }}
-            >
-              Music Producer • Creative Director
-            </p>
-          </Reveal>
-          <Reveal delay={150}>
-            <GoldDivider />
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: 15,
-                lineHeight: 1.85,
-                color: "var(--muted)",
-                maxWidth: 460,
-                marginBottom: 20,
-              }}
-            >
+          <Reveal from="right" delay={100}>
+            <Rule />
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: isMobile ? 17 : 18,
+              lineHeight: 1.9,
+              color: 'rgba(245,240,232,0.58)',
+              maxWidth: 420,
+              marginBottom: 24,
+            }}>
               I believe every artist deserves a sound that genuinely represents
-              who they are. My role is to help transform ideas into records that
-              connect emotionally and stand the test of time.
+              who they are. My role is to help transform ideas into records
+              that connect emotionally and stand the test of time.
             </p>
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: 15,
-                lineHeight: 1.85,
-                color: "rgba(255,255,255,0.4)",
-                maxWidth: 460,
-                marginBottom: 40,
-              }}
-            >
-              From a simple idea to a global impact—let's build your legacy
-              together.
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: isMobile ? 17 : 18,
+              lineHeight: 1.9,
+              color: 'rgba(245,240,232,0.32)',
+              maxWidth: 420,
+              marginBottom: 48,
+            }}>
+              From a simple idea to a global impact — let's build your legacy together.
             </p>
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: 42,
-                color: "var(--gold)",
-                letterSpacing: "0.04em",
-              }}
-            >
+            {/* Signature-style wordmark */}
+            <div style={{
+              fontFamily: "'Bebas Neue', sans-serif",
+              fontSize: isMobile ? 56 : 68,
+              color: '#d4a017',
+              letterSpacing: '0.08em',
+              lineHeight: 1,
+              borderTop: '1px solid rgba(212,160,23,0.2)',
+              paddingTop: 24,
+              opacity: 0.9,
+            }}>
               PRABH
             </div>
           </Reveal>
         </div>
-
-        {/* Right – photo placeholder */}
-        <Reveal delay={100}>
-          <div
-            style={{
-              aspectRatio: "3/4",
-              background:
-                "linear-gradient(160deg, #1c1408 0%, #0d0d0d 100%)",
-              border: "1px solid rgba(212,160,23,0.2)",
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            {/* Warm light on one side */}
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                width: "60%",
-                height: "100%",
-                background:
-                  "radial-gradient(ellipse at 80% 20%, rgba(212,120,0,0.2) 0%, transparent 60%)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-              }}
-            >
-              <div style={{ fontSize: 56, opacity: 0.18 }}>🎹</div>
-              <p
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10,
-                  letterSpacing: "0.2em",
-                  color: "rgba(212,160,23,0.3)",
-                  textTransform: "uppercase",
-                }}
-              >
-                Prabh · Studio Portrait
-              </p>
-            </div>
-            {/* Bottom-right gold badge */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: 20,
-                right: 20,
-                width: 56,
-                height: 56,
-                background: "var(--gold)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: 26,
-                  color: "var(--black)",
-                  lineHeight: 1,
-                }}
-              >
-                P
-              </span>
-            </div>
-          </div>
-        </Reveal>
       </div>
     </section>
   );
 }
 
-// ─── Footer CTA ───────────────────────────────────────────────────────────────
-function CTASection() {
+/* ─────────────────────────────────────────────
+   CTA
+───────────────────────────────────────────── */
+function CTASection({ isMobile }: { isMobile: boolean }) {
   return (
-    <section
-      style={{
-        padding: "80px 80px 100px",
-        textAlign: "center",
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          background:
-            "radial-gradient(ellipse at 50% 100%, rgba(212,160,23,0.07) 0%, transparent 60%)",
-          pointerEvents: "none",
-        }}
-      />
+    <section style={{
+      padding: isMobile ? '96px 28px 80px' : '120px 72px 100px',
+      textAlign: 'center',
+      borderTop: '1px solid rgba(255,255,255,0.05)',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Radial glow */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'radial-gradient(ellipse at 50% 120%, rgba(212,160,23,0.1) 0%, transparent 60%)',
+        pointerEvents: 'none',
+      }} />
       <Reveal>
-        <p
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 10,
-            letterSpacing: "0.22em",
-            color: "var(--gold)",
-            textTransform: "uppercase",
-            marginBottom: 24,
-          }}
-        >
-          Ready to Begin?
-        </p>
-        <h2
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(36px, 5vw, 72px)",
-            letterSpacing: "-0.02em",
-            color: "var(--white)",
-            margin: "0 0 32px",
-            lineHeight: 1,
-          }}
-        >
-          LET'S BUILD YOUR
-          <br />
-          <span style={{ color: "var(--gold)" }}>LEGACY.</span>
+        <span style={{
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 10,
+          letterSpacing: '0.26em',
+          color: '#d4a017',
+          textTransform: 'uppercase',
+          display: 'block',
+          marginBottom: 28,
+        }}>Ready to Begin?</span>
+        <h2 style={{
+          fontFamily: "'Bebas Neue', sans-serif",
+          fontSize: isMobile ? 'clamp(56px, 14vw, 80px)' : 'clamp(64px, 7vw, 104px)',
+          lineHeight: 0.9,
+          letterSpacing: '-0.02em',
+          color: '#f5f0e8',
+          marginBottom: 20,
+        }}>
+          LET'S BUILD<br />YOUR{' '}
+          <span style={{ color: '#d4a017' }}>LEGACY.</span>
         </h2>
-        <button
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: 11,
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-            color: "var(--black)",
-            background: "var(--gold)",
-            border: "none",
-            padding: "16px 48px",
-            cursor: "pointer",
-            transition: "transform 0.2s, box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) => {
-            const b = e.currentTarget as HTMLButtonElement;
-            b.style.transform = "scale(1.04)";
-            b.style.boxShadow = "0 0 40px rgba(212,160,23,0.35)";
-          }}
-          onMouseLeave={(e) => {
-            const b = e.currentTarget as HTMLButtonElement;
-            b.style.transform = "scale(1)";
-            b.style.boxShadow = "none";
-          }}
-        >
-          START YOUR JOURNEY
-        </button>
+        <p style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: isMobile ? 17 : 19,
+          lineHeight: 1.8,
+          color: 'rgba(245,240,232,0.4)',
+          maxWidth: 380,
+          margin: '0 auto 52px',
+        }}>
+          Every great career started with a single decision to begin.
+        </p>
+        <GoldBtn large>Start Your Journey</GoldBtn>
       </Reveal>
     </section>
   );
 }
 
-// ─── Root ─────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────── */
+// function Footer({ isMobile }: { isMobile: boolean }) {
+//   return (
+//     <footer style={{
+//       padding: isMobile ? '28px 28px' : '28px 72px',
+//       borderTop: '1px solid rgba(212,160,23,0.15)',
+//       display: 'flex',
+//       justifyContent: 'space-between',
+//       alignItems: 'center',
+//       flexWrap: 'wrap',
+//       gap: 16,
+//     }}>
+//       <span style={{
+//         fontFamily: "'Bebas Neue', sans-serif",
+//         fontSize: 20,
+//         color: '#d4a017',
+//         letterSpacing: '0.14em',
+//       }}>PRABH MUSIK</span>
+//       <span style={{
+//         fontFamily: "'Space Mono', monospace",
+//         fontSize: 9,
+//         letterSpacing: '0.2em',
+//         color: 'rgba(212,160,23,0.35)',
+//         textTransform: 'uppercase',
+//       }}>© 2025 · All Rights Reserved</span>
+//     </footer>
+//   );
+// }
+
+/* ─────────────────────────────────────────────
+   ROOT
+───────────────────────────────────────────── */
 export default function PrabhMusikAbout() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth <= 900);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Space+Mono:wght@400;700&display=swap');
 
-        :root {
-          --gold: #d4a017;
-          --gold-light: #f0c040;
-          --white: #f5f0e8;
-          --black: #0a0a0a;
-          --muted: rgba(245,240,232,0.55);
-          --font-display: 'Bebas Neue', sans-serif;
-          --font-body: 'Cormorant Garamond', serif;
-          --font-mono: 'Space Mono', monospace;
-        }
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html { scroll-behavior: smooth; }
+
         body {
-          background: var(--black);
-          color: var(--white);
+          background: #080808;
+          color: #f5f0e8;
           -webkit-font-smoothing: antialiased;
+          overflow-x: hidden;
         }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #111; }
-        ::-webkit-scrollbar-thumb { background: var(--gold); }
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: #0d0d0d; }
+        ::-webkit-scrollbar-thumb { background: #d4a017; }
 
-        /* Selection */
-        ::selection { background: rgba(212,160,23,0.3); color: var(--white); }
+        ::selection { background: rgba(212,160,23,0.28); color: #f5f0e8; }
+
+        @keyframes ticker {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+        @keyframes tickerR {
+          from { transform: translateX(-50%); }
+          to   { transform: translateX(0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
       `}</style>
 
-      <div
-        style={{
-          background: "var(--black)",
-          minHeight: "100vh",
-          position: "relative",
-        }}
-      >
-        {/* Noise texture overlay */}
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            pointerEvents: "none",
-            zIndex: 9999,
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E\")",
-            opacity: 0.5,
-          }}
-        />
+      <div style={{ background: '#080808', minHeight: '100vh', position: 'relative' }}>
+        {/* Noise overlay */}
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 9999,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")`,
+          opacity: 0.45,
+        }} />
 
-        <HeroSection />
-        <VisionSection />
-        <ServicesSection />
-        <ProcessSection />
-        <SuccessSection />
-        <FounderSection />
-        {/* <CTASection /> */}
-
-        {/* Footer */}
-      
+        <HeroSection isMobile={isMobile} />
+        <Ticker />
+        <VisionSection isMobile={isMobile} />
+        <ServicesSection isMobile={isMobile} />
+        <Ticker reversed />
+        <ProcessSection isMobile={isMobile} />
+        <SuccessSection isMobile={isMobile} />
+        <FounderSection isMobile={isMobile} />
+        <CTASection isMobile={isMobile} />
+        {/* <Footer isMobile={isMobile} /> */}
       </div>
     </>
   );

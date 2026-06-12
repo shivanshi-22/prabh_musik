@@ -157,26 +157,9 @@ const LegalLink: React.FC<{ label: string; href?: string }> = ({ label, href = "
 
 const GraphyFooter: React.FC = () => {
   return (
-    <footer
-      style={{
-        background: "#0a0a0a",
-        borderRadius: 12,
-        padding: "48px 40px 32px",
-        fontFamily:
-          "'DM Sans', 'Helvetica Neue', sans-serif",
-        color: "#e8e0d0",
-      }}
-    >
+    <footer className="footer">
       {/* Top grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.6fr 1fr 1fr 1fr",
-          gap: 32,
-          paddingBottom: 40,
-          borderBottom: "0.5px solid #2a2a2a",
-        }}
-      >
+      <div className="footer-grid">
         {/* Brand column */}
         <div>
           <div
@@ -212,7 +195,7 @@ const GraphyFooter: React.FC = () => {
             Graphy empowers teams to transform raw data into clear, compelling
             visuals — making insights easier to share, understand, and act on.
           </p>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div className="footer-social">
             {socialLinks.map((s) => (
               <SocialButton key={s.label} {...s} />
             ))}
@@ -254,18 +237,11 @@ const GraphyFooter: React.FC = () => {
       </div>
 
       {/* Bottom bar */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          paddingTop: 28,
-        }}
-      >
+      <div className="footer-bottom">
         <span style={{ fontSize: 12, color: "#3a3530" }}>
           © 2025 PrabhMusik. All rights reserved.
         </span>
-        <div style={{ display: "flex", gap: 24 }}>
+        <div className="footer-legal-links">
           <LegalLink label="Privacy Policy" />
           <LegalLink label="Terms of Service" />
           <LegalLink label="Cookies Settings" />

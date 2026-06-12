@@ -7,6 +7,7 @@ const beats = [
     genre: "HIP HOP",
     songs: 412,
     label: "POPPIN'",
+    img: "/poppin.png",
     bg: "linear-gradient(135deg, #1a4a2e 0%, #0d2b1a 40%, #0a1f12 100%)",
     accent: "#00ff88",
     textOverlay: true,
@@ -16,6 +17,7 @@ const beats = [
     genre: "HIP HOP",
     songs: 412,
     label: null,
+    img: "/hip-hop_tb.png",
     bg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
     accent: "#a0c4ff",
     textOverlay: false,
@@ -25,7 +27,7 @@ const beats = [
     genre: "HIP HOP",
     songs: 412,
     label: null,
-    bg: "linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #111 100%)",
+    bg: "/public/poppin.png",
     accent: "#ffffff",
     textOverlay: false,
   },
@@ -80,6 +82,7 @@ function BeatCard({ beat, index }) {
 
   return (
     <div
+      className="beat-card-container"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -90,6 +93,7 @@ function BeatCard({ beat, index }) {
     >
       {/* Image Card */}
       <div
+        className="beat-card-image"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
@@ -114,6 +118,20 @@ function BeatCard({ beat, index }) {
             background: beat.bg,
           }}
         />
+
+        {beat.img && (
+          <img
+            src={beat.img}
+            alt={beat.label ?? beat.genre}
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        )}
 
         {/* City glow effect for card 4 */}
         {beat.cityGlow && (
@@ -225,6 +243,7 @@ function BeatCard({ beat, index }) {
           }}
         >
           <button
+            className="play-button"
             onMouseEnter={() => setPlayHovered(true)}
             onMouseLeave={() => setPlayHovered(false)}
             style={{
@@ -252,6 +271,7 @@ function BeatCard({ beat, index }) {
       {/* Info Row */}
       <div>
         <div
+          className="beat-card-title"
           style={{
             fontFamily: "'Georgia', serif",
             fontSize: "18px",
@@ -264,6 +284,7 @@ function BeatCard({ beat, index }) {
           {beat.genre}
         </div>
         <div
+          className="beat-card-songs"
           style={{
             display: "flex",
             alignItems: "center",
@@ -279,6 +300,7 @@ function BeatCard({ beat, index }) {
 
         {/* Add to Cart Button */}
         <button
+          className="beat-card-btn"
           onMouseEnter={() => setCartHovered(true)}
           onMouseLeave={() => setCartHovered(false)}
           style={{
@@ -321,9 +343,114 @@ export default function TrendingTypeBeats() {
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #111; }
+
+        @media (max-width: 1024px) {
+          .trending-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 24px !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .trending-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 20px !important;
+          }
+          .trending-header {
+            flex-direction: column !important;
+            gap: 24px !important;
+          }
+          .trending-nav {
+            align-self: flex-start !important;
+          }
+          .beat-card-title {
+            font-size: 16px !important;
+          }
+          .beat-card-songs {
+            font-size: 11px !important;
+          }
+          .beat-card-btn {
+            font-size: 12px !important;
+            padding: 8px 0 !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .trending-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 18px !important;
+          }
+          .trending-header {
+            flex-direction: column !important;
+            gap: 20px !important;
+            margin-bottom: 32px !important;
+          }
+          .trending-title {
+            font-size: clamp(24px, 5vw, 32px) !important;
+          }
+          .trending-desc {
+            font-size: 12px !important;
+          }
+          .trending-nav {
+            align-self: flex-start !important;
+            gap: 8px !important;
+          }
+          .trending-nav button {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          .beat-card-title {
+            font-size: 15px !important;
+          }
+          .beat-card-songs {
+            font-size: 11px !important;
+          }
+          .beat-card-btn {
+            font-size: 12px !important;
+            padding: 8px 0 !important;
+          }
+          .play-button {
+            width: 38px !important;
+            height: 38px !important;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .trending-container {
+            padding: 40px 20px !important;
+          }
+          .trending-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 16px !important;
+          }
+          .trending-title {
+            font-size: clamp(20px, 6vw, 28px) !important;
+          }
+          .trending-desc {
+            font-size: 11px !important;
+          }
+          .beat-card-container {
+            gap: 12px !important;
+          }
+          .beat-card-image {
+            border-radius: 8px !important;
+          }
+          .beat-card-title {
+            font-size: 14px !important;
+          }
+          .beat-card-songs {
+            font-size: 10px !important;
+            margin-bottom: 10px !important;
+          }
+          .beat-card-btn {
+            font-size: 11px !important;
+            padding: 7px 0 !important;
+          }
+        }
       `}</style>
 
       <div
+        className="trending-container"
         style={{
           minHeight: "100vh",
           background: "#111111",
@@ -333,6 +460,7 @@ export default function TrendingTypeBeats() {
       >
         {/* Header */}
         <div
+          className="trending-header"
           style={{
             display: "flex",
             alignItems: "flex-start",
@@ -342,6 +470,7 @@ export default function TrendingTypeBeats() {
         >
           <div style={{ maxWidth: "420px" }}>
             <h1
+              className="trending-title"
               style={{
                 fontFamily: "'Georgia', serif",
                 fontSize: "clamp(32px, 4vw, 52px)",
@@ -355,6 +484,7 @@ export default function TrendingTypeBeats() {
               Trending Type Beats
             </h1>
             <p
+              className="trending-desc"
               style={{
                 color: "rgba(255,255,255,0.4)",
                 fontSize: "13px",
@@ -368,7 +498,7 @@ export default function TrendingTypeBeats() {
           </div>
 
           {/* Nav arrows */}
-          <div style={{ display: "flex", gap: "10px", paddingTop: "8px" }}>
+          <div className="trending-nav" style={{ display: "flex", gap: "10px", paddingTop: "8px" }}>
             {["left", "right"].map((dir) => {
               const isHov = dir === "left" ? leftHovered : rightHovered;
               return (
@@ -400,6 +530,7 @@ export default function TrendingTypeBeats() {
 
         {/* Beat Cards Grid */}
         <div
+          className="trending-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",

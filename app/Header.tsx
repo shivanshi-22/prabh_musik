@@ -76,20 +76,20 @@ export default function Header() {
         style={{
           position: "relative",
           zIndex: 100,
-          width: "75%",
-          margin: "16px auto 0",
-          background: "rgba(28, 24, 20, 0.82)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
+          width: "100%",
+          maxWidth: 1240,
+          margin: "16px auto 16px",
+          background: "#0A0C10",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
           border: "1px solid rgba(255,255,255,0.09)",
-          borderRadius: "14px",
-          boxShadow: "0 8px 40px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.06) inset",
+          borderRadius: "18px",
+          boxShadow: "0 8px 40px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset",
         }}
       >
         <div
           style={{
-            padding: "0 28px",
-            height: "52px",
+            padding: "12px 28px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",

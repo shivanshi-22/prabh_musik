@@ -1,5 +1,6 @@
 'use client';
 import { JSX, useState } from "react";
+import Link from "next/link";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ServiceCard {
@@ -7,6 +8,7 @@ interface ServiceCard {
   title: string;
   description: string;
   learnMore: string;
+  slug: string;
 //   icon: JSX.Element;
   imagePlaceholder: string;
 }
@@ -102,6 +104,7 @@ const services: ServiceCard[] = [
     title: "Music Production",
     description: "From beatmaking to full arrangements, we craft high-quality, industry-ready tracks that bring your sound to life.",
     learnMore: "Learn more",
+    slug: "music-production",
     // icon: <WaveformIcon />,
     imagePlaceholder: `url('${serviceImageFiles[0]}'), ${serviceImageFallbacks[0]}`,
   },
@@ -110,6 +113,7 @@ const services: ServiceCard[] = [
     title: "Mix n Master",
     description: "We deliver clean, balanced mixes and loud, professional masters ready for all major streaming platforms.",
     learnMore: "Learn more",
+    slug: "mix-n-master",
     // icon: <SlidersIcon />,
     imagePlaceholder: `url('${serviceImageFiles[1]}'), ${serviceImageFallbacks[1]}`,
   },
@@ -118,6 +122,7 @@ const services: ServiceCard[] = [
     title: "Lyrics",
     description: "Powerful words, real emotion. We write lyrics that connect, inspire, and make your music unforgettable.",
     learnMore: "Learn more",
+    slug: "lyrics",
     // icon: <PenIcon />,
     imagePlaceholder: `url('${serviceImageFiles[2]}'), ${serviceImageFallbacks[2]}`,
   },
@@ -126,6 +131,7 @@ const services: ServiceCard[] = [
     title: "Marketing & Distribution",
     description: "We help you reach the right audience and get your music on all major platforms worldwide.",
     learnMore: "Learn more",
+    slug: "marketing-distribution",
     // icon: <GlobeIcon />,
     imagePlaceholder: `url('${serviceImageFiles[3]}'), ${serviceImageFallbacks[3]}`,
   },
@@ -440,8 +446,9 @@ export default function ServicesPage() {
           }}
         >
           {services.map((svc, i) => (
-            <div
+            <Link
               key={i}
+              href={`/services/${svc.slug}`}
               className="service-card"
               onMouseEnter={() => setHoveredCard(i)}
               onMouseLeave={() => setHoveredCard(null)}
@@ -500,11 +507,13 @@ export default function ServicesPage() {
                   {svc.description}
                 </p>
 
-                <button className="learn-more-btn">
-                  {svc.learnMore} <ArrowRightIcon />
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  <span className="learn-more-btn">
+                    {svc.learnMore} <ArrowRightIcon />
+                  </span>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

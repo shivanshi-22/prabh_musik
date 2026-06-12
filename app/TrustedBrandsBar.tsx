@@ -79,7 +79,7 @@ const brands = [
 ];
 
 // Duplicate for seamless infinite scroll
-const allBrands = [...brands, ...brands];
+const allBrands = [...brands, ...brands, ...brands, ...brands];
 
 export default function TrustedBrands() {
   return (
@@ -89,7 +89,7 @@ export default function TrustedBrands() {
 
         @keyframes marquee {
           0%   { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
+          100% { transform: translateX(-25%); }
         }
 
         .marquee-track {
@@ -117,6 +117,38 @@ export default function TrustedBrands() {
           opacity: 1;
           transform: translateY(-2px);
         }
+
+        @media (max-width: 900px) {
+          section {
+            padding: 26px 0 28px;
+          }
+
+          .trusted-pill {
+            padding: 10px 26px;
+          }
+
+          .trusted-pill span {
+            font-size: 16px;
+            letter-spacing: 0.03em;
+            white-space: normal;
+            text-align: center;
+            line-height: 1.2;
+          }
+
+          .marquee-track {
+            gap: 32px;
+            animation-duration: 24s;
+          }
+
+          .brand-item {
+            padding: 0 4px;
+          }
+
+          .brand-item svg {
+            height: 20px;
+            width: auto;
+          }
+        }
       `}</style>
 
       <section
@@ -135,6 +167,7 @@ export default function TrustedBrands() {
           }}
         >
           <div
+            className="trusted-pill"
             style={{
               display: "inline-flex",
               alignItems: "center",

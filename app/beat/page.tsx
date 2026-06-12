@@ -287,8 +287,7 @@ function Pagination({ current, total, onChange }: { current: number; total: numb
 
 // ─── Trending Beat Types Header ───────────────────────────────────────────────
 
-function TrendingHeader({ search, onSearch }: { search: string; onSearch: (v: string) => void }) {
-  const [hidden, setHidden] = useState(false);
+function TrendingHeader({ search, onSearch, isMobile }: { search: string; onSearch: (v: string) => void; isMobile: boolean }) {
   const [activeArtist, setActiveArtist] = useState(1); // Sidhu Moose Wala default
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
@@ -296,56 +295,32 @@ function TrendingHeader({ search, onSearch }: { search: string; onSearch: (v: st
     <div style={{ paddingTop: 36, paddingBottom: 10 }}>
 
       {/* ── Trending Beat Types row ── */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
+      <div style={{ display: "flex", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", marginBottom: 22, flexDirection: isMobile ? "column" : "row", gap: isMobile ? 14 : 0 }}>
         <h1 style={{
-          fontFamily: "'Syne', sans-serif",
-          fontSize: 34,
+          fontFamily: "'Inter', sans-serif",
+          fontSize: isMobile ? 34 : 72,
           fontWeight: 800,
-          letterSpacing: "-0.3px",
-          background: "linear-gradient(135deg, #fff 25%, #e8c96a 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
+          lineHeight: isMobile ? "42px" : "79.2px",
+          letterSpacing: isMobile ? "-0.8px" : "-1.44px",
+          color: "#E5E2E1",
+          margin: 0,
         }}>Trending Beat Types</h1>
-
-        <button
-          onClick={() => setHidden((h) => !h)}
-          style={{
-            display: "flex", alignItems: "center", gap: 6,
-            background: "rgba(255,255,255,0.07)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            borderRadius: 8,
-            color: "rgba(255,255,255,0.65)",
-            fontSize: 13, fontWeight: 500,
-            padding: "7px 14px",
-            cursor: "pointer",
-            fontFamily: "'DM Sans', sans-serif",
-            transition: "background 0.15s",
-          }}
-          onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.12)")}
-          onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.07)")}
-        >
-          {hidden ? "Show" : "Hide"}
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            {hidden
-              ? <path d="M2 4l4 4 4-4"/>
-              : <path d="M2 8l4-4 4 4"/>
-            }
-          </svg>
-        </button>
       </div>
 
       {/* ── Artist circles ── */}
-      {!hidden && (
-        <div style={{
-          display: "flex", gap: 28, marginBottom: 26,
-          overflowX: "auto", paddingBottom: 4,
+      <div style={{
+        display: "flex", gap: 22, marginBottom: 26,
+          flexWrap: "nowrap",
+          overflowX: "auto", paddingBottom: 8,
           scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch",
+          scrollSnapType: "x mandatory",
         }}>
           {ARTISTS.map((a, i) => (
             <div
               key={i}
               onClick={() => setActiveArtist(i)}
-              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer", flexShrink: 0 }}
+              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, cursor: "pointer", flexShrink: 0, minWidth: isMobile ? 108 : undefined, scrollSnapAlign: "start" }}
             >
               <div style={{
                 width: 88, height: 88, borderRadius: "50%",
@@ -380,10 +355,9 @@ function TrendingHeader({ search, onSearch }: { search: string; onSearch: (v: st
             </div>
           ))}
         </div>
-      )}
 
       {/* ── Row 1: Search bar + tag pills + Refresh ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "nowrap", overflowX: "auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12, flexWrap: "wrap", justifyContent: "flex-start" }}>
         {/* Search — dark pill, icon left, wider */}
         <div style={{
           display: "flex", alignItems: "center",
@@ -391,7 +365,8 @@ function TrendingHeader({ search, onSearch }: { search: string; onSearch: (v: st
           border: "none",
           borderRadius: 24,
           flexShrink: 0,
-          width: 240,
+          width: isMobile ? "100%" : 240,
+          minWidth: 0,
         }}>
           <svg style={{ marginLeft: 14, flexShrink: 0, color: "rgba(255,255,255,0.45)" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -459,7 +434,7 @@ function TrendingHeader({ search, onSearch }: { search: string; onSearch: (v: st
       </div>
 
       {/* ── Row 2: Filter dropdowns ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4, flexWrap: "wrap", justifyContent: "flex-start" }}>
         {FILTER_DROPDOWNS.map((f) => (
           <button
             key={f}
@@ -503,6 +478,7 @@ export default function BeatMarketplace() {
   const [duration, setDuration] = useState(0);
   const [isLooping, setIsLooping] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const load = useCallback(async (p: number) => {
@@ -514,6 +490,13 @@ export default function BeatMarketplace() {
   }, []);
 
   useEffect(() => { load(page); }, [page, load]);
+
+  useEffect(() => {
+    const update = () => setIsMobile(window.innerWidth <= 900);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   useEffect(() => {
     const audio = new Audio();
@@ -642,7 +625,7 @@ export default function BeatMarketplace() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;1,500&family=Jacques+Francois:wght@400&display=swap');
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: #120e06; }
         @keyframes fadeUp {
@@ -664,6 +647,7 @@ export default function BeatMarketplace() {
         background: "linear-gradient(160deg, #1c1408 0%, #0f0b04 60%, #120d05 100%)",
         fontFamily: "'DM Sans', sans-serif",
         color: "#fff",
+        overflowX: "hidden",
       }}>
         {/* Subtle top vignette glow */}
         <div style={{
@@ -672,39 +656,38 @@ export default function BeatMarketplace() {
           pointerEvents: "none", zIndex: 0,
         }} />
 
-        <div style={{ position: "relative", zIndex: 1, maxWidth: 1360, margin: "0 auto", padding: "0 32px 70px" }}>
+        <div style={{ position: "relative", zIndex: 1, maxWidth: 1360, margin: "0 auto", padding: isMobile ? "0 16px 70px" : "0 32px 70px" }}>
 
-          {/* ── NEW: Trending Beat Types header ── */}
-          <TrendingHeader search={search} onSearch={setSearch} />
+            {/* ── Hero: Beats background + title (full-bleed) ── */}
+<div style={{ position: "relative", left: "50%", right: "50%", marginLeft: "-50vw", marginRight: "-50vw", width: "100vw", maxWidth: "100vw", boxSizing: "border-box", paddingBottom: 40, overflowX: "hidden" }}>
+            <div style={{ position: "relative", height: 360, overflow: "hidden" }}>
+              <img src="/beats_bg.png" alt="Beats background" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.78) 100%)" }} />
+              <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", alignItems: "center" }}>
+                <div style={{ maxWidth: 1360, margin: isMobile ? "0 auto 0 20px" : "0 auto 0 92px", padding: isMobile ? "22px 18px 22px 16px" : "36px 48px 36px 20px" }}>
+                  {/* <p style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.75)", letterSpacing: "0.26em", textTransform: "uppercase", fontSize: 12, marginBottom: 8 }}>Industry</p> */}
+                  <h1 style={{ fontFamily: "'Jacques Francois', serif", fontWeight: 400, fontSize: isMobile ? 42 : "clamp(56px, 6vw, 94px)", color: "#fff", lineHeight: isMobile ? 1.05 : 0.84, marginBottom: 10 }}>Industry<br />Ready beats for Artists</h1>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontStyle: "italic", fontWeight: 500, color: "rgba(255,255,255,0.9)", maxWidth: 720, marginBottom: 6, fontSize: isMobile ? 20 : 38.88, lineHeight: isMobile ? 1.5 : 2 }}>~who wants to stand out</p>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontWeight: 400, color: "rgba(255,255,255,0.68)", maxWidth: 760, marginTop: 8, fontSize: isMobile ? 15 : 18.66, lineHeight: isMobile ? 1.5 : 1 }}>Premium Trap, Drill, Punjabi, Emotional and commercial beats crafted for independent artists and labels.</p>
+                </div>
+              </div>
+              </div>
+            </div>
+
+            {/* ── NEW: Trending Beat Types header ── */}
+            <TrendingHeader search={search} onSearch={setSearch} isMobile={isMobile} />
 
           {/* ── Toolbar ── */}
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18, marginBottom: 18, gap: 6 }}>
-            {/* Favourite / wishlist icon */}
-            <button style={{
-              width: 38, height: 38, borderRadius: 9, cursor: "pointer",
-              border: "1px solid rgba(255,255,255,0.1)",
-              background: "rgba(255,255,255,0.04)",
-              color: "rgba(255,255,255,0.38)",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              transition: "all 0.15s",
-            }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "rgba(251,191,36,0.35)"; e.currentTarget.style.color = "#fbbf24"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)"; e.currentTarget.style.color = "rgba(255,255,255,0.38)"; }}
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-              </svg>
-            </button>
-
-            {(["grid", "list"] as const).map((m) => (
+          <div style={{ display: "flex", justifyContent: isMobile ? "space-between" : "flex-end", flexWrap: "wrap", marginTop: 18, marginBottom: 18, gap: 8 }}>
+              {(["grid", "list"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => setViewMode(m)}
+                disabled
                 style={{
-                  width: 38, height: 38, borderRadius: 9, cursor: "pointer",
+                  width: 38, height: 38, borderRadius: 9, cursor: "not-allowed",
                   border: viewMode === m ? "1px solid rgba(251,191,36,0.55)" : "1px solid rgba(255,255,255,0.1)",
                   background: viewMode === m ? "rgba(251,191,36,0.14)" : "rgba(255,255,255,0.04)",
-                  color: viewMode === m ? "#fbbf24" : "rgba(255,255,255,0.38)",
+                  color: viewMode === m ? "#fbbf24" : "rgba(255,255,255,0.24)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   transition: "all 0.15s",
                 }}
@@ -719,7 +702,7 @@ export default function BeatMarketplace() {
 
           {/* ── Grid ── */}
           {viewMode === "grid" ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16 }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, minmax(0, 1fr))" : "repeat(5, 1fr)", gap: isMobile ? 12 : 16 }}>
               {loading
                 ? Array.from({ length: 18 }).map((_, i) => <SkeletonCard key={i} />)
                 : filtered.map((beat, i) => (
@@ -742,10 +725,10 @@ export default function BeatMarketplace() {
                 ))
                 : filtered.map((beat, i) => (
                   <div key={beat.id} style={{
-                    display: "flex", alignItems: "center", gap: 14,
+                    display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "stretch" : "center", gap: isMobile ? 12 : 14,
                     background: "#1a1409",
                     border: "1px solid rgba(255,255,255,0.07)",
-                    borderRadius: 10, padding: "10px 16px",
+                    borderRadius: 10, padding: isMobile ? "14px" : "10px 16px",
                     animationDelay: `${i * 25}ms`,
                     animation: "fadeUp 0.35s ease both",
                     cursor: "pointer", transition: "background 0.15s, border-color 0.15s",
@@ -754,38 +737,40 @@ export default function BeatMarketplace() {
                     onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(251,191,36,0.06)"; e.currentTarget.style.borderColor = "rgba(251,191,36,0.2)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.background = "#1a1409"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; }}
                   >
-                    <img src={beat.cover} alt={beat.title} style={{ width: 46, height: 46, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <img src={beat.cover} alt={beat.title} style={{ width: isMobile ? "100%" : 46, height: isMobile ? 180 : 46, borderRadius: 12, objectFit: "cover", flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0, marginTop: isMobile ? 10 : 0 }}>
                       <p style={{ fontWeight: 700, fontSize: 14, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", fontFamily: "'Syne',sans-serif" }}>{beat.title}</p>
                       <p style={{ fontSize: 12, color: "rgba(255,255,255,0.38)", marginTop: 2 }}>{beat.producer} 👑 · {beat.genre} · {beat.bpm} BPM</p>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        playBeat(beat);
-                      }}
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: "50%",
-                        border: "none",
-                        background: "#fbbf24",
-                        color: "#000",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {currentBeat?.id === beat.id && isPlaying ? (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6h4v12H7zm6 0h4v12h-4z"/></svg>
-                      ) : (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                      )}
-                    </button>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <PriceButton price={beat.price} />
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, width: isMobile ? "100%" : "auto", justifyContent: isMobile ? "space-between" : "flex-end", marginTop: isMobile ? 10 : 0 }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          playBeat(beat);
+                        }}
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: "50%",
+                          border: "none",
+                          background: "#fbbf24",
+                          color: "#000",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          cursor: "pointer",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {currentBeat?.id === beat.id && isPlaying ? (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6h4v12H7zm6 0h4v12h-4z"/></svg>
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        )}
+                      </button>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <PriceButton price={beat.price} />
+                      </div>
                     </div>
                   </div>
                 ))
@@ -823,7 +808,7 @@ export default function BeatMarketplace() {
             borderTop: "1px solid rgba(255,255,255,0.08)",
             boxShadow: "0 -18px 48px rgba(0,0,0,0.6)",
             backdropFilter: "blur(10px)",
-            padding: "8px 20px 12px",
+            padding: isMobile ? "10px 12px 14px" : "8px 20px 12px",
           }}>
             <div
               style={{
@@ -858,12 +843,12 @@ export default function BeatMarketplace() {
             >
               ×
             </button>
-            <div style={{ maxWidth: 1360, margin: "0 auto", paddingRight: 34 }}>
+            <div style={{ maxWidth: 1360, margin: "0 auto", paddingRight: isMobile ? 0 : 34 }}>
               <div style={{
                 height: 42,
                 marginBottom: 8,
                 display: "grid",
-                gridTemplateColumns: "56px 1fr 56px",
+                gridTemplateColumns: isMobile ? "1fr" : "56px 1fr 56px",
                 alignItems: "center",
                 gap: 8,
               }}>
@@ -927,13 +912,13 @@ export default function BeatMarketplace() {
                 minHeight: 56,
                 flexWrap: "wrap",
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 240, flex: "1 1 320px" }}>
+                <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: 12, minWidth: 240, flex: "1 1 320px" }}>
                   <img
                     src={currentBeat.cover}
                     alt={currentBeat.title}
                     style={{ width: 62, height: 62, borderRadius: 7, objectFit: "cover", flexShrink: 0 }}
                   />
-                  <div style={{ minWidth: 0 }}>
+                  <div style={{ minWidth: 0, width: isMobile ? "100%" : "auto" }}>
                     <p style={{
                       display: "flex",
                       alignItems: "center",
@@ -975,7 +960,7 @@ export default function BeatMarketplace() {
                   </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 14, flex: "0 1 auto" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, flex: "0 1 auto", flexWrap: "wrap", justifyContent: isMobile ? "flex-start" : "flex-end" }}>
                   <button
                     onClick={() => setIsLiked((v) => !v)}
                     style={{ border: "none", background: "transparent", color: isLiked ? "#ffffff" : "rgba(255,255,255,0.8)", cursor: "pointer", padding: 4 }}
@@ -1035,7 +1020,7 @@ export default function BeatMarketplace() {
                   </button>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: "flex-end", flex: "1 1 400px", minWidth: 240 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, justifyContent: isMobile ? "space-between" : "flex-end", flex: "1 1 400px", minWidth: 240, flexWrap: "wrap" }}>
                   <button style={{ border: "none", background: "transparent", color: "rgba(255,255,255,0.9)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                     ✪ Edit
                   </button>

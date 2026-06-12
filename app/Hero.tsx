@@ -27,9 +27,54 @@ export default function HeroSection() {
           to   { opacity: 1; }
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @media (max-width: 900px) {
+          .hero-section {
+            min-height: auto !important;
+            align-items: flex-start !important;
+            padding-top: 60px !important;
+            padding-bottom: 60px !important;
+          }
+
+          .hero-copy {
+            max-width: 100% !important;
+            padding-left: 4% !important;
+            padding-right: 4% !important;
+          }
+
+          .hero-image-container {
+            position: absolute !important;
+            width: 100% !important;
+            height: 40vh !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            overflow: hidden !important;
+          }
+
+          .hero-image-container img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+          }
+
+          .hero-section h1 {
+            font-size: 3.4rem !important;
+            line-height: 1.05 !important;
+          }
+
+          .hero-section p {
+            font-size: clamp(0.95rem, 2.5vw, 1rem) !important;
+          }
+
+          .hero-section button {
+            width: fit-content !important;
+          }
+        }
       `}</style>
 
       <section
+        className="hero-section"
         style={{
           position: "relative",
           width: "100%",
@@ -67,6 +112,7 @@ export default function HeroSection() {
             ARTIST + KEYBOARD IMAGE (right side)
         ══════════════════════════════════════════ */}
         <div
+          className="hero-image-container"
           style={{
             position: "absolute",
             right: 0,
@@ -98,6 +144,7 @@ export default function HeroSection() {
             LEFT CONTENT
         ══════════════════════════ */}
         <div
+          className="hero-copy"
           style={{
             position: "relative",
             zIndex: 10,
@@ -111,10 +158,10 @@ export default function HeroSection() {
           <h1
             style={{
               fontFamily: fontsLoaded ? "'Jacques Francois', serif" : "Georgia, 'Times New Roman', serif",
-              fontSize: "3.2rem",
+              fontSize: "5.8rem",
               fontWeight: 400,
               color: "#fff",
-              lineHeight: 1.1,
+              lineHeight: 0.9,
               marginBottom: "18px",
               animation: "fadeUp 0.7s ease both",
               animationDelay: "0.1s",

@@ -7,6 +7,7 @@ interface Artist {
   album: string;
   genre: string;
   year: string;
+  image?: string;
   skinTone: string;
   clothColor: string;
   clothColor2: string;
@@ -20,6 +21,7 @@ const artists: Artist[] = [
     album: "Dont Look 2",
     genre: "Punjabi Trap",
     year: "2024",
+    image: "/karan.png",
     skinTone: "#c68642",
     clothColor: "#7B3A1A",
     clothColor2: "#5a2a10",
@@ -31,6 +33,7 @@ const artists: Artist[] = [
     album: "Dont Look 2",
     genre: "Punjabi Trap",
     year: "2024",
+    image: "/siddhu.png",
     skinTone: "#b5763a",
     clothColor: "#1a2a4a",
     clothColor2: "#0f1e36",
@@ -42,6 +45,7 @@ const artists: Artist[] = [
     album: "Dont Look 2",
     genre: "Punjabi Trap",
     year: "2024",
+    image: "/ap.png",
     skinTone: "#c09060",
     clothColor: "#1a1a3a",
     clothColor2: "#0f0f28",
@@ -73,7 +77,7 @@ const artists: Artist[] = [
 
 function PlayCircleIcon() {
   return (
-    <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+    <svg className="artists-play-icon" width="28" height="28" viewBox="0 0 28 28" fill="none">
       <circle cx="14" cy="14" r="13" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" />
       <path d="M11 9.5l9 4.5-9 4.5V9.5z" fill="rgba(255,255,255,0.85)" />
     </svg>
@@ -82,7 +86,7 @@ function PlayCircleIcon() {
 
 function MusicIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.5)">
+    <svg className="artists-icon" width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.5)">
       <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
     </svg>
   );
@@ -148,26 +152,22 @@ function ArtistCard({ artist, index }: { artist: Artist; index: number }) {
 
   return (
     <div
+      className="artists-card"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        minWidth: "380px",
+        scrollSnapAlign: "start",
+        minWidth: "460px",
+        width: "460px",
         borderRadius: "16px",
-        background: hovered
-          ? "rgba(255,255,255,0.10)"
-          : "rgba(255,255,255,0.06)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        border: `1px solid ${hovered ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.10)"}`,
+        background: hovered ? "rgba(255, 255, 255, 0.14)" : "rgba(255, 255, 255, 0.1)",
+        border: `1px solid ${hovered ? "rgba(255,255,255,0.22)" : "rgba(255,255,255,0.14)"}`,
         display: "flex",
         alignItems: "flex-end",
         gap: "0",
         overflow: "hidden",
         cursor: "pointer",
         transform: hovered ? "translateY(-5px)" : "translateY(0)",
-        boxShadow: hovered
-          ? "0 24px 60px rgba(0,0,0,0.45)"
-          : "0 8px 28px rgba(0,0,0,0.3)",
         transition: "transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease",
         animation: `fadeSlideUp 0.55s ease both`,
         animationDelay: `${index * 0.1}s`,
@@ -186,12 +186,28 @@ function ArtistCard({ artist, index }: { artist: Artist; index: number }) {
 
       {/* Artist figure */}
       <div style={{ paddingLeft: "10px", paddingBottom: "0", lineHeight: 0, flexShrink: 0 }}>
-        <ArtistSVG a={artist} />
+        {artist.image ? (
+          <img
+            className="artists-card-image"
+            src={artist.image}
+            alt={artist.name}
+            style={{
+              width: 150,
+              height: 190,
+              objectFit: "cover",
+              borderRadius: "16px",
+              display: "block",
+            }}
+          />
+        ) : (
+          <ArtistSVG a={artist} />
+        )}
       </div>
 
       {/* Info */}
-      <div style={{ padding: "28px 24px 28px 16px", flex: 1 }}>
+      <div className="artists-card-info" style={{ padding: "28px 24px 28px 16px", flex: 1 }}>
         <h3
+          className="artists-card-name"
           style={{
             fontFamily: "'Jacques Francois', Georgia, serif",
             fontSize: "24px",
@@ -204,7 +220,7 @@ function ArtistCard({ artist, index }: { artist: Artist; index: number }) {
           {artist.name}
         </h3>
 
-        <p style={{
+        <p className="artists-card-text" style={{
           fontFamily: "'Inter', sans-serif",
           fontSize: "13px",
           color: "rgba(255,255,255,0.5)",
@@ -213,7 +229,7 @@ function ArtistCard({ artist, index }: { artist: Artist; index: number }) {
         }}>
           {artist.album}
         </p>
-        <p style={{
+        <p className="artists-card-text" style={{
           fontFamily: "'Inter', sans-serif",
           fontSize: "13px",
           color: "rgba(255,255,255,0.5)",
@@ -230,6 +246,7 @@ function ArtistCard({ artist, index }: { artist: Artist; index: number }) {
 
         {/* Listen Now */}
         <button
+          className="artists-card-button"
           onMouseEnter={() => setListenHov(true)}
           onMouseLeave={() => setListenHov(false)}
           style={{
@@ -273,13 +290,70 @@ export default function ArtistsWorkedWith() {
         }
         .artists-scroll::-webkit-scrollbar { display: none; }
         .artists-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @media (max-width: 900px) {
+          .artists-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            justify-content: flex-start !important;
+            gap: 12px !important;
+            width: 100% !important;
+            margin-bottom: 24px !important;
+          }
+          .artists-header-buttons {
+            align-self: flex-end !important;
+            width: 100% !important;
+            justify-content: flex-end !important;
+          }
+          .artists-card {
+            min-width: 280px !important;
+            width: 280px !important;
+            padding: 0 !important;
+          }
+          .artists-card-image {
+            width: 90px !important;
+            height: 120px !important;
+          }
+          .artists-card-info {
+            padding: 16px 12px 16px 10px !important;
+          }
+          .artists-card-name {
+            font-size: 16px !important;
+            margin-bottom: 6px !important;
+          }
+          .artists-card-text {
+            font-size: 11px !important;
+            margin-bottom: 8px !important;
+          }
+          .artists-card-button {
+            font-size: 12px !important;
+          }
+          .artists-icon {
+            width: 16px !important;
+            height: 16px !important;
+          }
+          .artists-play-icon {
+            width: 20px !important;
+            height: 20px !important;
+          }
+          .artists-header-title {
+            font-size: 24px !important;
+            margin-bottom: 0 !important;
+          }
+          .artists-scroll {
+            gap: 12px !important;
+            padding: 0 12px 6px !important;
+          }
+        }
       `}</style>
 
       <section
         style={{
-          /* Warm amber-brown gradient background matching the design */
-          background: "linear-gradient(135deg, #2a1200 0%, #3d1a00 20%, #1e0d00 45%, #2e1500 65%, #1a0900 100%)",
-          padding: "56px 5% 64px",
+          backgroundImage: "url('/art_bg.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          padding: "56px 1% 64px",
           fontFamily: "'Inter', sans-serif",
           position: "relative",
           overflow: "hidden",
@@ -300,7 +374,7 @@ export default function ArtistsWorkedWith() {
         }} />
 
         {/* ── Header ── */}
-        <div style={{
+        <div className="artists-header" style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -308,7 +382,7 @@ export default function ArtistsWorkedWith() {
           position: "relative",
           zIndex: 2,
         }}>
-          <h2 style={{
+          <h2 className="artists-header-title" style={{
             fontFamily: "'Jacques Francois', Georgia, serif",
             fontSize: "clamp(26px, 3.5vw, 48px)",
             fontWeight: 400,
@@ -319,7 +393,7 @@ export default function ArtistsWorkedWith() {
             Artists I have Worked With
           </h2>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="artists-header-buttons" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <button
               onMouseEnter={() => setViewAllHov(true)}
               onMouseLeave={() => setViewAllHov(false)}
@@ -371,7 +445,9 @@ export default function ArtistsWorkedWith() {
             display: "flex",
             gap: "18px",
             overflowX: "auto",
-            paddingBottom: "6px",
+            padding: "0 18px 6px",
+            scrollSnapType: "x mandatory",
+            scrollPaddingInline: "18px",
             position: "relative",
             zIndex: 2,
           }}

@@ -230,6 +230,13 @@ const TestimonialsMarquee: React.FC = () => {
           right: 0;
           background: linear-gradient(to left, #100d15, transparent);
         }
+
+        @media (max-width: 640px) {
+          .testimonial-heading {
+            font-size: clamp(30px, 7vw, 36px) !important;
+            max-width: 100% !important;
+          }
+        }
       `}</style>
 
       <section
@@ -256,6 +263,7 @@ const TestimonialsMarquee: React.FC = () => {
           }}
         >
           <h2
+            className="testimonial-heading"
             style={{
               fontFamily: "'Jacques Francois', Georgia, 'Times New Roman', serif",
               fontSize: "65px",

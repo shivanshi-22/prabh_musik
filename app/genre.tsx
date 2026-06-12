@@ -4,55 +4,29 @@ import { useState } from "react";
 interface Genre {
   id: number;
   name: string;
-  labelPosition: { bottom: string; left: string };
-  bgGradient: string;
-  figures: Figure[];
-}
-
-interface Figure {
-  type: "dancer" | "couple" | "duo" | "guitarist";
-  skinTone: string;
-  clothColor: string;
-  clothColor2?: string;
+  image: string;
 }
 
 const genres: Genre[] = [
   {
     id: 1,
     name: "Hip Hop",
-    labelPosition: { bottom: "24px", left: "18px" },
-    bgGradient: "linear-gradient(160deg, #2a1a0a 0%, #1a0f05 40%, #0d0a08 100%)",
-    figures: [
-      { type: "dancer", skinTone: "#c07840", clothColor: "#f5f5f5", clothColor2: "#1a1a1a" },
-      { type: "dancer", skinTone: "#3a2010", clothColor: "#ff6600", clothColor2: "#1a1a1a" },
-    ],
+    image: "/hip-hop.png",
   },
   {
     id: 2,
     name: "POP",
-    labelPosition: { bottom: "24px", left: "18px" },
-    bgGradient: "linear-gradient(160deg, #1e1010 0%, #2a1515 40%, #0d0808 100%)",
-    figures: [
-      { type: "couple", skinTone: "#d4a070", clothColor: "#d4a070", clothColor2: "#8B4513" },
-    ],
+    image: "/pop.png",
   },
   {
     id: 3,
     name: "R&B",
-    labelPosition: { bottom: "24px", left: "18px" },
-    bgGradient: "linear-gradient(160deg, #101820 0%, #151e2a 40%, #080d14 100%)",
-    figures: [
-      { type: "duo", skinTone: "#5a3520", clothColor: "#b8860b", clothColor2: "#2a1a0a" },
-    ],
+    image: "/r%26b.png",
   },
   {
     id: 4,
     name: "Rock",
-    labelPosition: { bottom: "24px", left: "18px" },
-    bgGradient: "linear-gradient(160deg, #101028 0%, #181830 40%, #080810 100%)",
-    figures: [
-      { type: "guitarist", skinTone: "#c8a070", clothColor: "#1a1a2a", clothColor2: "#0a0a18" },
-    ],
+    image: "/rock.png",
   },
 ];
 
@@ -332,75 +306,46 @@ function GenreCard({ genre, index }: { genre: Genre; index: number }) {
 
   return (
     <div
+      className="genre-card"
       style={{
         display: "flex",
         flexDirection: "column",
         gap: "14px",
         animation: `fadeSlideUp 0.55s ease both`,
         animationDelay: `${index * 0.1}s`,
-        flex: "1 1 0",
-        minWidth: "200px",
+        flex: "0 1 calc((100% - 60px) / 4)",
+        minWidth: "280px",
+        maxWidth: "320px",
       }}
     >
-      {/* Image card */}
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         style={{
           position: "relative",
-          borderRadius: "12px",
+          borderRadius: "20px",
           overflow: "hidden",
-          aspectRatio: "3 / 4",
-          background: genre.bgGradient,
+          width: "100%",
+          aspectRatio: "1 / 1",
+          backgroundImage: `url(${genre.image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           cursor: "pointer",
           transform: hovered ? "scale(1.02)" : "scale(1)",
           boxShadow: hovered
-            ? "0 20px 50px rgba(0,0,0,0.6)"
-            : "0 8px 24px rgba(0,0,0,0.4)",
+            ? "0 24px 60px rgba(0,0,0,0.55)"
+            : "0 10px 26px rgba(0,0,0,0.34)",
           transition: "transform 0.3s ease, box-shadow 0.3s ease",
         }}
-      >
-        {/* SVG illustration filling card */}
-        <div style={{ position: "absolute", inset: 0 }}>
-          <GenreCardSVG id={genre.id} />
-        </div>
-
-        {/* Darkening overlay at bottom for label readability */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%)",
-          }}
-        />
-
-        {/* Genre label on image */}
-        <span
-          style={{
-            position: "absolute",
-            bottom: genre.labelPosition.bottom,
-            left: genre.labelPosition.left,
-            fontFamily: "'Jacques Francois', Georgia, serif",
-            fontSize: "22px",
-            fontWeight: 400,
-            color: "#ffffff",
-            letterSpacing: "0.5px",
-            textShadow: "0 2px 10px rgba(0,0,0,0.7)",
-          }}
-        >
-          {genre.name}
-        </span>
-      </div>
-
-      {/* Label below card */}
+      />
       <p
         style={{
+          margin: 0,
           fontFamily: "'Jacques Francois', Georgia, serif",
           fontSize: "20px",
-          fontWeight: 400,
           color: "#ffffff",
-          letterSpacing: "0.2px",
+          textAlign: "center",
+          letterSpacing: "0.4px",
         }}
       >
         {genre.name}
@@ -421,6 +366,68 @@ export default function PopularGenres() {
           to   { opacity: 1; transform: translateY(0);    }
         }
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        @media (max-width: 900px) {
+          .genre-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 24px !important;
+          }
+
+          .genre-heading {
+            font-size: clamp(34px, 8vw, 44px) !important;
+            max-width: 100% !important;
+          }
+
+          .genre-grid {
+            gap: 16px !important;
+            justify-content: center !important;
+          }
+
+          /* two columns on small / tablet screens */
+          .genre-card {
+            flex: 0 1 calc(50% - 10px) !important;
+            min-width: calc(50% - 10px) !important;
+            max-width: calc(50% - 10px) !important;
+            width: calc(50% - 10px) !important;
+          }
+        }
+
+        @media (max-width: 520px) {
+          section {
+            padding: 40px 4% !important;
+          }
+
+          .genre-header {
+            gap: 18px !important;
+          }
+
+          .genre-heading {
+            font-size: clamp(28px, 10vw, 34px) !important;
+          }
+
+          .genre-grid {
+            gap: 14px !important;
+          }
+
+          /* keep two columns on narrower mobile until very small screens */
+          .genre-card {
+            flex: 0 1 calc(50% - 8px) !important;
+            min-width: calc(50% - 8px) !important;
+            max-width: calc(50% - 8px) !important;
+            width: calc(50% - 8px) !important;
+          }
+
+          /* hide the Explore All button on small screens */
+          .explore-btn {
+            display: none !important;
+          }
+
+          /* hide the descriptive paragraph on mobile */
+          .genre-desc {
+            display: none !important;
+          }
+        }
       `}</style>
 
       <section
@@ -432,6 +439,7 @@ export default function PopularGenres() {
       >
         {/* ── Header row ── */}
         <div
+          className="genre-header"
           style={{
             display: "flex",
             alignItems: "flex-start",
@@ -442,6 +450,7 @@ export default function PopularGenres() {
         >
           <div style={{ maxWidth: "520px" }}>
             <h2
+              className="genre-heading"
               style={{
                 fontFamily: "'Jacques Francois', Georgia, serif",
                 fontSize: "clamp(32px, 4.5vw, 56px)",
@@ -455,6 +464,7 @@ export default function PopularGenres() {
               Popular Genres
             </h2>
             <p
+              className="genre-desc"
               style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "14px",
@@ -470,6 +480,7 @@ export default function PopularGenres() {
           </div>
 
           <button
+            className="explore-btn"
             onMouseEnter={() => setExploreHov(true)}
             onMouseLeave={() => setExploreHov(false)}
             style={{
@@ -495,9 +506,12 @@ export default function PopularGenres() {
 
         {/* ── Genre Cards Grid ── */}
         <div
+          className="genre-grid"
           style={{
             display: "flex",
+            flexWrap: "wrap",
             gap: "20px",
+            justifyContent: "space-between",
             alignItems: "flex-start",
           }}
         >
