@@ -13,7 +13,7 @@ export default function HomePage() {
       <TrustedBrandsBar />
       <ArtistsWorkedWith />
       <TrendingBeats />
-        <PopularGenres />
+      <PopularGenres />
       <Testimonials />
       <BeatstarsHero />
     </>

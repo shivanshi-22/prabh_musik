@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const navLinks = ["Home", "About", "Services", "Beats"];
 
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const [activeLink, setActiveLink] = useState("Home");
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchVal, setSearchVal] = useState("");
@@ -108,25 +109,25 @@ export default function Header() {
           >
             <span
               style={{
-                fontFamily: "'Jacques Francois', Georgia, serif",
+                fontFamily: "'Irish Grover', cursive",
                 fontSize: "20px",
                 fontWeight: 400,
                 color: "#d4820a",
                 letterSpacing: "0.3px",
               }}
             >
-              Prabh
+              Prahbh
             </span>
             <span
               style={{
-                fontFamily: "'Jacques Francois', Georgia, serif",
+                fontFamily: "'Irish Grover', cursive",
                 fontSize: "20px",
                 fontWeight: 400,
                 color: "#ffffff",
                 letterSpacing: "0.3px",
               }}
             >
-              {" "}Music
+              {" "}Musik
             </span>
           </div>
 
@@ -151,7 +152,7 @@ export default function Header() {
                   } else if (link === "Home") {
                     router.push("/");
                   } else if (link === "Services") {
-                      router.push("/services");
+                    router.push("/services");
                   } else if (link === "Beats") {
                     router.push("/beat");
                   }
