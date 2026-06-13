@@ -1,5 +1,6 @@
 'use client';
 import React from "react";
+import { usePathname } from "next/navigation";
 
 const socialLinks = [
   {
@@ -156,6 +157,9 @@ const LegalLink: React.FC<{ label: string; href?: string }> = ({ label, href = "
 };
 
 const GraphyFooter: React.FC = () => {
+  const pathname = usePathname();
+  if (pathname === "/signup") return null;
+
   return (
     <footer
       style={{

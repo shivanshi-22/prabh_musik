@@ -27,9 +27,15 @@ body {
 }
 
 @keyframes scroll-logos {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
+
 .animate-scroll-logos {
   animation: scroll-logos 20s linear infinite;
 }
@@ -41,15 +47,17 @@ body {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 /* Custom premium ambient glow background for the artists section */
 .artists-glow-bg {
   position: relative;
   background-color: #000000;
-  background-image: 
+  background-image:
     radial-gradient(circle at 50% 120%, rgba(245, 158, 11, 0.18) 0%, rgba(120, 53, 4, 0.05) 50%, rgba(0, 0, 0, 0) 80%),
     radial-gradient(circle at 10% 110%, rgba(217, 119, 6, 0.06) 0%, rgba(0, 0, 0, 0) 60%),
     radial-gradient(circle at 90% 110%, rgba(217, 119, 6, 0.06) 0%, rgba(0, 0, 0, 0) 60%);
