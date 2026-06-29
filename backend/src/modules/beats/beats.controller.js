@@ -8,7 +8,7 @@ const createBeat = async (req, res) => {
   const beat = await service.createBeat(req.body);
   res.status(201).json({
     success: true,
-    data: beat,
+    data: beat
   });
 };
 
@@ -21,7 +21,7 @@ const getAllBeats = async (req, res) => {
   res.json({
     success: true,
     count: beats.length,
-    data: beats,
+    data: beats
   });
 };
 
@@ -33,7 +33,7 @@ const getBeat = async (req, res) => {
   const beat = await service.getBeat(req.params.id);
   res.json({
     success: true,
-    data: beat,
+    data: beat
   });
 };
 
@@ -45,7 +45,7 @@ const updateBeat = async (req, res) => {
   const beat = await service.updateBeat(req.params.id, req.body);
   res.json({
     success: true,
-    data: beat,
+    data: beat
   });
 };
 
@@ -57,7 +57,7 @@ const archiveBeat = async (req, res) => {
   await service.archiveBeat(req.params.id);
   res.json({
     success: true,
-    message: "Beat archived successfully.",
+    message: "Beat archived successfully."
   });
 };
 
@@ -77,5 +77,5 @@ module.exports = {
   getBeat,
   updateBeat,
   archiveBeat,
-  getBeatObject,
+  getBeatObject
 };
