@@ -4,6 +4,7 @@ const catchAsync = require("../../utils/catchAsync");
 
 const router = express.Router();
 
+router.get("/object/:key", catchAsync(controller.getBeatObject));
 router.get("/", catchAsync(controller.getAllBeats));
 router.get("/:id", catchAsync(controller.getBeat));
 router.post("/", catchAsync(controller.createBeat));
