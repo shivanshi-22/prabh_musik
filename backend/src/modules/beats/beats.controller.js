@@ -61,12 +61,18 @@ const archiveBeat = async (req, res) => {
   });
 };
 
+<<<<<<< HEAD
 /**
  * Streams a stored beat object (audio/image) from the configured storage backend.
  * GET /api/beats/object/:key
  */
 const getBeatObject = async (req, res) => {
   const result = await service.getBeatObject(req.params.key);
+=======
+const getBeatObject = async (req, res) => {
+  const result = await service.getBeatObject(req.params.key);
+
+>>>>>>> e857e27 (Complete beats module integration and R2 upload flow)
   res.set("Content-Type", result.contentType || "application/octet-stream");
   res.send(result.buffer);
 };
@@ -77,5 +83,9 @@ module.exports = {
   getBeat,
   updateBeat,
   archiveBeat,
+<<<<<<< HEAD
   getBeatObject
+=======
+  getBeatObject,
+>>>>>>> e857e27 (Complete beats module integration and R2 upload flow)
 };

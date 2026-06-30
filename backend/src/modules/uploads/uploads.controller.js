@@ -14,6 +14,9 @@ const uploadAudio = async (req, res) => {
  * POST /api/uploads/upload-image
  */
 const uploadImage = async (req, res) => {
+  console.log("IMAGE ROUTE HIT");
+  console.log(req.file);
+
   const result = await service.uploadImageFile(req.file);
   res.json(result);
 };

@@ -8,13 +8,14 @@ import { PageHeader } from "../../../components/admin/PageHeader"
 import { BeatTable } from "../../../components/admin/beats/BeatTable"
 import { BeatFilters } from "../../../components/admin/beats/BeatFilters"
 import { useBeats } from "../../../hooks/useBeats"
-import { mockArtists } from "../../../mock/artists"
+import { useArtists } from "../../../hooks/useArtists"
 import { Button } from "../../../components/ui/button"
 import { EmptyState } from "../../../components/admin/EmptyState"
 import { TableSkeleton } from "../../../components/admin/LoadingSkeleton"
 
 export default function BeatsPage() {
   const { data: beats = [], isLoading } = useBeats()
+  const { data: artists = [] } = useArtists()
 
   // Filter States
   const [search, setSearch] = React.useState("")
@@ -38,9 +39,9 @@ export default function BeatsPage() {
       // 1. Search Query
       if (search) {
         const query = search.toLowerCase()
-        const artist = mockArtists.find((a) => a.id === beat.artistId)
+        const artist = artists.find((a) => a.id === beat.artistId)
         const matchesTitle = beat.title.toLowerCase().includes(query)
-        const matchesArtist = artist?.stageName.toLowerCase().includes(query)
+        const matchesArtist = artist?.stageName.toLowerCase().includes(query) || "prabh musik".includes(query)
         if (!matchesTitle && !matchesArtist) return false
       }
 
@@ -60,7 +61,7 @@ export default function BeatsPage() {
 
       return true
     })
-  }, [beats, search, genreFilter, moodFilter, statusFilter, bpmMin, bpmMax])
+  }, [beats, artists, search, genreFilter, moodFilter, statusFilter, bpmMin, bpmMax])
 
   return (
     <div className="relative space-y-8 animate-in fade-in duration-500">

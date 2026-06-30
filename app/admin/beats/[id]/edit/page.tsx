@@ -30,6 +30,12 @@ export default function EditBeatPage() {
     })
   }
 
+  const errorMsg = updateBeatMutation.error
+    ? (updateBeatMutation.error as any)?.response?.data?.error || 
+      (updateBeatMutation.error as any)?.response?.data?.message || 
+      updateBeatMutation.error.message
+    : null;
+
   if (isLoading) {
     return (
       <div className="space-y-8 animate-pulse">
@@ -74,6 +80,7 @@ export default function EditBeatPage() {
         initialValues={beat}
         onSubmit={handleFormSubmit}
         isSubmitting={updateBeatMutation.isPending}
+        error={errorMsg}
       />
     </div>
   )

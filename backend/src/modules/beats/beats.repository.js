@@ -138,8 +138,7 @@ const existsBySlug = async (slug) => {
   const sql = `
     SELECT id 
     FROM beats 
-    WHERE slug = ? 
-      AND status != 'archived'
+    WHERE slug = ?
   `;
   const row = await get(sql, [slug]);
   return !!row;

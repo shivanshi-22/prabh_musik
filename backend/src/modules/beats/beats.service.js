@@ -151,19 +151,34 @@ const archiveBeat = async (id) => {
   return repository.archiveBeat(id);
 };
 
+<<<<<<< HEAD
 /**
  * Fetches a stored beat object from the configured storage backend.
  *
  * @param {string} key - Storage object key
  * @returns {Promise<{buffer: Buffer, contentType: string}>}
  */
+=======
+>>>>>>> e857e27 (Complete beats module integration and R2 upload flow)
 const getBeatObject = async (key) => {
   if (!key) {
     throw new AppError("Object key is required", 400);
   }
 
   const decodedKey = decodeURIComponent(key);
+<<<<<<< HEAD
   return r2Service.getFile(decodedKey);
+=======
+
+  try {
+    return await r2Service.getFile(decodedKey);
+  } catch (err) {
+    if (err.name === "NoSuchKey" || err.Code === "NoSuchKey" || err.code === "NoSuchKey") {
+      throw new AppError("Object not found in storage", 404);
+    }
+    throw err;
+  }
+>>>>>>> e857e27 (Complete beats module integration and R2 upload flow)
 };
 
 module.exports = {
@@ -172,5 +187,9 @@ module.exports = {
   getAllBeats,
   updateBeat,
   archiveBeat,
+<<<<<<< HEAD
   getBeatObject,
+=======
+  getBeatObject
+>>>>>>> e857e27 (Complete beats module integration and R2 upload flow)
 };

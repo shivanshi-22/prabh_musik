@@ -52,6 +52,7 @@ export interface Beat {
   price: number;
   status: 'DRAFT' | 'AVAILABLE' | 'SOLD';
   createdAt: string;
+  duration?: number;
   assets: BeatAssetUrls;
   analytics: BeatAnalytics;
   ownershipsCount: number;

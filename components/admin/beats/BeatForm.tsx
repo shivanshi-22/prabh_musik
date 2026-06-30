@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { Beat, BeatAssetUrls } from "../../../types/admin"
-import { mockArtists } from "../../../mock/artists"
+import { useArtists } from "../../../hooks/useArtists"
 import { BEAT_GENRES } from "../../../constants/beat-genres"
 import { BEAT_MOODS } from "../../../constants/beat-moods"
 import { BEAT_KEYS } from "../../../constants/beat-keys"
@@ -15,13 +15,22 @@ interface BeatFormProps {
   initialValues?: Beat;
   onSubmit: (data: Omit<Beat, 'id' | 'createdAt' | 'analytics' | 'ownershipsCount'>) => void;
   isSubmitting: boolean;
+  error?: string | null;
 }
 
-export function BeatForm({ initialValues, onSubmit, isSubmitting }: BeatFormProps) {
+export function BeatForm({ initialValues, onSubmit, isSubmitting, error }: BeatFormProps) {
   const router = useRouter()
+  const { data: artists = [] } = useArtists()
   const [title, setTitle] = React.useState(initialValues?.title || "")
-  const [artistId, setArtistId] = React.useState(initialValues?.artistId || mockArtists[0]?.id || "")
+  const [artistId, setArtistId] = React.useState(initialValues?.artistId || "")
+  const [duration, setDuration] = React.useState(initialValues?.duration || 0)
   const [description, setDescription] = React.useState(initialValues?.description || "")
+
+  React.useEffect(() => {
+    if (!artistId && artists.length > 0) {
+      setArtistId(artists[0].id)
+    }
+  }, [artists, artistId])
   
   const [type, setType] = React.useState<'beat' | 'song' | 'vocals'>(initialValues?.type || 'beat')
   const [genre, setGenre] = React.useState(initialValues?.genre || BEAT_GENRES[0])
@@ -71,12 +80,18 @@ export function BeatForm({ initialValues, onSubmit, isSubmitting }: BeatFormProp
       tags,
       price: parseFloat(price) || 0,
       status,
+      duration,
       assets,
-    })
+    } as any)
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl">
+      {error && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400 font-medium animate-in fade-in duration-200">
+          ⚠️ {error}
+        </div>
+      )}
       {/* Section 1: Basic Information */}
       <div className="rounded-xl border border-card-border bg-card p-6 space-y-6">
         <h2 className="text-lg font-bold text-white border-b border-card-border pb-3">Section 1: Basic Information</h2>
@@ -97,7 +112,7 @@ export function BeatForm({ initialValues, onSubmit, isSubmitting }: BeatFormProp
               onChange={(e) => setArtistId(e.target.value)}
               className="w-full rounded-md border border-card-border bg-background px-3 py-2 text-sm text-neutral-200 outline-none focus:border-white/[0.12]"
             >
-              {mockArtists.map(artist => (
+              {artists.map(artist => (
                 <option key={artist.id} value={artist.id}>{artist.stageName}</option>
               ))}
             </select>
@@ -238,7 +253,7 @@ export function BeatForm({ initialValues, onSubmit, isSubmitting }: BeatFormProp
             accept="image/*"
             description="JPG or PNG. Min 500x500px."
             value={assets.coverImage}
-            onChange={(url) => handleAssetChange("coverImage", url)}
+            onUploadComplete={(key) => handleAssetChange("coverImage", key)}
             type="image"
           />
           <BeatUploadZone
@@ -246,7 +261,7 @@ export function BeatForm({ initialValues, onSubmit, isSubmitting }: BeatFormProp
             accept="image/*"
             description="JPG or PNG. Preferred 1200x400px."
             value={assets.bannerImage}
-            onChange={(url) => handleAssetChange("bannerImage", url)}
+            onUploadComplete={(key) => handleAssetChange("bannerImage", key)}
             type="image"
           />
           <BeatUploadZone
@@ -254,7 +269,10 @@ export function BeatForm({ initialValues, onSubmit, isSubmitting }: BeatFormProp
             accept="audio/mp3,audio/wav"
             description="MP3 or WAV tagged file for site play."
             value={assets.previewAudio}
-            onChange={(url) => handleAssetChange("previewAudio", url)}
+            onUploadComplete={(key, dur) => {
+              handleAssetChange("previewAudio", key)
+              if (dur) setDuration(dur)
+            }}
             type="audio"
           />
           <BeatUploadZone
@@ -262,7 +280,7 @@ export function BeatForm({ initialValues, onSubmit, isSubmitting }: BeatFormProp
             accept="audio/wav"
             description="High-quality WAV audio file for purchasers."
             value={assets.wavFile}
-            onChange={(url) => handleAssetChange("wavFile", url)}
+            onUploadComplete={(key) => handleAssetChange("wavFile", key)}
             type="audio"
           />
           <BeatUploadZone
@@ -270,29 +288,39 @@ export function BeatForm({ initialValues, onSubmit, isSubmitting }: BeatFormProp
             accept="application/zip,application/x-zip-compressed"
             description="ZIP archive holding separated stems."
             value={assets.stemsFile}
-            onChange={(url) => handleAssetChange("stemsFile", url)}
+            onUploadComplete={(key) => handleAssetChange("stemsFile", key)}
             type="document"
           />
         </div>
       </div>
 
       {/* Submit / Cancel row */}
-      <div className="flex justify-end gap-3.5">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={() => router.push("/admin/beats")}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </Button>
-        <Button 
-          type="submit" 
-          disabled={isSubmitting}
-          className="px-6"
-        >
-          {isSubmitting ? "Saving Beat..." : (initialValues ? "Save Changes" : "Upload Beat")}
-        </Button>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-card-border pt-6">
+        <div>
+          {!assets.previewAudio && (
+            <div className="text-amber-500 text-sm flex items-center gap-1.5 font-medium">
+              <span>⚠️</span>
+              <span>Warning: Preview audio has not been uploaded.</span>
+            </div>
+          )}
+        </div>
+        <div className="flex justify-end gap-3.5 w-full sm:w-auto">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => router.push("/admin/beats")}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isSubmitting}
+            className="px-6"
+          >
+            {isSubmitting ? "Saving Beat..." : (initialValues ? "Save Changes" : "Upload Beat")}
+          </Button>
+        </div>
       </div>
     </form>
   )

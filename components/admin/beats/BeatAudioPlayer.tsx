@@ -7,12 +7,13 @@ import { Button } from "../../ui/button"
 interface BeatAudioPlayerProps {
   audioUrl: string;
   title: string;
+  initialDuration?: number;
 }
 
-export function BeatAudioPlayer({ audioUrl, title }: BeatAudioPlayerProps) {
+export function BeatAudioPlayer({ audioUrl, title, initialDuration }: BeatAudioPlayerProps) {
   const [isPlaying, setIsPlaying] = React.useState(false)
   const [currentTime, setCurrentTime] = React.useState(0)
-  const [duration, setDuration] = React.useState(0)
+  const [duration, setDuration] = React.useState(initialDuration || 0)
   const [volume, setVolume] = React.useState(0.8)
   const [isMuted, setIsMuted] = React.useState(false)
   
@@ -22,10 +23,11 @@ export function BeatAudioPlayer({ audioUrl, title }: BeatAudioPlayerProps) {
     // Reset player states if url changes
     setIsPlaying(false)
     setCurrentTime(0)
+    setDuration(initialDuration || 0)
     if (audioRef.current) {
       audioRef.current.load()
     }
-  }, [audioUrl])
+  }, [audioUrl, initialDuration])
 
   const togglePlay = () => {
     if (!audioRef.current) return

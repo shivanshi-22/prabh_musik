@@ -38,6 +38,12 @@ export function BeatMetadataCard({ beat }: BeatMetadataCardProps) {
             <span className="text-xs text-neutral-500 uppercase font-semibold">License Track Type</span>
             <span className="text-sm font-semibold text-neutral-200 capitalize">{beat.trackType}</span>
           </div>
+          <div className="flex flex-col space-y-1">
+            <span className="text-xs text-neutral-500 uppercase font-semibold">Duration</span>
+            <span className="text-sm font-semibold text-neutral-200 font-mono">
+              {beat.duration ? `${Math.floor(beat.duration / 60)}:${(beat.duration % 60).toString().padStart(2, '0')}` : "--:--"}
+            </span>
+          </div>
         </div>
 
         {beat.tags && beat.tags.length > 0 && (

@@ -1,13 +1,6 @@
 import axios from "axios";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
-
-// Throw a descriptive startup error if the backend URL is not configured
-if (!baseURL) {
-  throw new Error(
-    "NEXT_PUBLIC_API_URL environment variable is missing. Please define it in your .env or .env.local file."
-  );
-}
+const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005/api";
 
 const api = axios.create({
   baseURL,

@@ -14,8 +14,17 @@ export function mapBackendToFrontend(beat: any): Beat {
     // If the key is already a complete URL, return it unchanged
     if (key.startsWith("http://") || key.startsWith("https://")) return key;
     // Otherwise, point to the backend object streaming endpoint
-    return `http://localhost:5000/api/beats/object/${key}`;
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5005/api";
+    const cleanApiUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+    return `${cleanApiUrl}/beats/object/${encodeURIComponent(key)}`;
   };
+
+  const statusMap: Record<string, 'DRAFT' | 'AVAILABLE' | 'SOLD'> = {
+    draft: "DRAFT",
+    published: "AVAILABLE",
+    archived: "SOLD"
+  };
+  const mappedStatus = statusMap[beat.status || "draft"] || "DRAFT";
 
   return {
     id: String(beat.id),
@@ -24,14 +33,15 @@ export function mapBackendToFrontend(beat: any): Beat {
     description: beat.description || "",
     genre: beat.genre || "",
     bpm: beat.bpm || 0,
-    key: beat.mood || "", // Fallback key mapping to mood
+    key: "", // Separated from mood, keep empty since backend does not have musical_key column yet
     mood: beat.mood || "",
     type: beat.beat_type || "beat",
     trackType: beat.track_type || "non-exclusive",
     tags: [],
     price: beat.price || 0,
-    status: (beat.status || "draft").toUpperCase() as any, // Sync status case ('DRAFT' | 'AVAILABLE' | 'SOLD')
+    status: mappedStatus,
     createdAt: beat.created_at || new Date().toISOString(),
+    duration: beat.duration || 0,
     assets: {
       coverImage: getUrl(beat.cover_key),
       bannerImage: getUrl(beat.banner_key),
@@ -59,21 +69,27 @@ export function mapFrontendToBackend(beat: any): any {
   if (beat.description !== undefined) data.description = beat.description;
   if (beat.genre !== undefined) data.genre = beat.genre;
   if (beat.bpm !== undefined) data.bpm = Number(beat.bpm);
+  if (beat.duration !== undefined) data.duration = Number(beat.duration);
   if (beat.mood !== undefined) data.mood = beat.mood;
   if (beat.type !== undefined) data.beat_type = beat.type;
   if (beat.trackType !== undefined) data.track_type = beat.trackType;
   if (beat.price !== undefined) data.price = Number(beat.price);
   
   if (beat.status !== undefined) {
-    data.status = beat.status.toLowerCase();
+    const statusMapInverse: Record<string, string> = {
+      DRAFT: "draft",
+      AVAILABLE: "published",
+      SOLD: "archived"
+    };
+    data.status = statusMapInverse[beat.status] || "draft";
   }
 
   // Parse asset URLs back to raw storage keys
   if (beat.assets !== undefined) {
     const getRawKey = (url: string | undefined): string | null => {
       if (!url) return null;
-      if (url.includes("/api/beats/object/")) {
-        return url.split("/api/beats/object/").pop() || null;
+      if (url.includes("/beats/object/")) {
+        return url.split("/beats/object/").pop() || null;
       }
       return url;
     };

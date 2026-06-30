@@ -22,6 +22,12 @@ export default function NewBeatPage() {
     })
   }
 
+  const errorMsg = createBeatMutation.error
+    ? (createBeatMutation.error as any)?.response?.data?.error || 
+      (createBeatMutation.error as any)?.response?.data?.message || 
+      createBeatMutation.error.message
+    : null;
+
   return (
     <div className="relative space-y-8 animate-in fade-in duration-500">
       <div className="absolute top-[-100px] right-[-100px] h-[400px] w-[400px] bg-gradient-to-b from-accent/5 to-transparent blur-[100px] pointer-events-none -z-10" />
@@ -43,6 +49,7 @@ export default function NewBeatPage() {
       <BeatForm 
         onSubmit={handleFormSubmit}
         isSubmitting={createBeatMutation.isPending}
+        error={errorMsg}
       />
     </div>
   )

@@ -72,3 +72,5 @@ backend/Database/*.db
 
 # Environment
 backend/.env
+
+backend/Database/*.db

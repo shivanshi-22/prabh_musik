@@ -6,7 +6,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { Eye, Edit, Trash2, Copy, MoreHorizontal } from "lucide-react"
 
 import { Beat } from "../../../types/admin"
-import { mockArtists } from "../../../mock/artists"
+import { useArtists } from "../../../hooks/useArtists"
 import { DataTable } from "../DataTable"
 import { StatusBadge } from "../StatusBadge"
 import { Button } from "../../ui/button"
@@ -20,20 +20,40 @@ interface BeatTableProps {
 export function BeatTable({ beats }: BeatTableProps) {
   const deleteBeatMutation = useDeleteBeat()
   const duplicateBeatMutation = useDuplicateBeat()
+  const { data: artists = [] } = useArtists()
 
   const [beatToDelete, setBeatToDelete] = React.useState<string | null>(null)
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null)
+  const [actionError, setActionError] = React.useState<string | null>(null)
 
   const handleDeleteConfirm = () => {
     if (beatToDelete) {
-      deleteBeatMutation.mutate(beatToDelete)
-      setBeatToDelete(null)
+      setActionError(null)
+      deleteBeatMutation.mutate(beatToDelete, {
+        onSuccess: () => {
+          setBeatToDelete(null)
+        },
+        onError: (err: any) => {
+          setBeatToDelete(null)
+          const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Failed to delete track"
+          setActionError(msg)
+        }
+      })
     }
   }
 
   const handleDuplicate = (id: string) => {
-    duplicateBeatMutation.mutate(id)
-    setActiveDropdownId(null)
+    setActionError(null)
+    duplicateBeatMutation.mutate(id, {
+      onSuccess: () => {
+        setActiveDropdownId(null)
+      },
+      onError: (err: any) => {
+        setActiveDropdownId(null)
+        const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Failed to duplicate track"
+        setActionError(msg)
+      }
+    })
   }
 
   const columns: ColumnDef<Beat>[] = [
@@ -43,9 +63,23 @@ export function BeatTable({ beats }: BeatTableProps) {
       cell: ({ row }) => {
         const cover = row.original.assets.coverImage
         return (
-          <div className="h-10 w-10 rounded-md bg-neutral-900 border border-card-border overflow-hidden flex items-center justify-center shrink-0">
+          <div className="relative h-10 w-10 rounded-md bg-neutral-900 border border-card-border overflow-hidden flex items-center justify-center shrink-0">
             {cover ? (
-              <img src={cover} alt="Cover" className="h-full w-full object-cover" />
+              <>
+                <img 
+                  src={cover} 
+                  alt="Cover" 
+                  className="h-full w-full object-cover" 
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                    const fallbackEl = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                    if (fallbackEl) fallbackEl.style.display = "flex";
+                  }}
+                />
+                <div style={{ display: "none" }} className="h-full w-full flex items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800 text-[10px] text-neutral-600 font-bold font-mono">
+                  NO IMG
+                </div>
+              </>
             ) : (
               <span className="text-[10px] text-neutral-600 font-bold font-mono">NO IMG</span>
             )}
@@ -64,8 +98,8 @@ export function BeatTable({ beats }: BeatTableProps) {
       id: "artist",
       header: "Artist",
       cell: ({ row }) => {
-        const artist = mockArtists.find(a => a.id === row.original.artistId)
-        return <span>{artist ? artist.stageName : "Unknown Artist"}</span>
+        const artist = artists.find(a => a.id === row.original.artistId)
+        return <span>{artist ? artist.stageName : "Prabh Musik"}</span>
       }
     },
     {
@@ -171,6 +205,12 @@ export function BeatTable({ beats }: BeatTableProps) {
 
   return (
     <>
+      {actionError && (
+        <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-400 font-medium flex items-center justify-between animate-in fade-in duration-200">
+          <span>⚠️ {actionError}</span>
+          <button onClick={() => setActionError(null)} className="text-red-400/60 hover:text-red-300 text-xs font-semibold">Dismiss</button>
+        </div>
+      )}
       <DataTable columns={columns} data={beats} />
 
       <ConfirmDialog

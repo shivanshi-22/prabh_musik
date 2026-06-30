@@ -5,12 +5,14 @@ import { Upload, Check, Loader2, FileText, Image as ImageIcon, Music } from "luc
 import { Button } from "../../ui/button"
 import { cn } from "../../../lib/utils"
 
+import { uploadFile } from "../../../services/upload.service"
+
 interface BeatUploadZoneProps {
   label: string;
   accept: string;
   description: string;
   value?: string;
-  onChange: (url: string) => void;
+  onUploadComplete: (key: string, duration?: number) => void;
   type: "image" | "audio" | "document";
 }
 
@@ -19,73 +21,52 @@ export function BeatUploadZone({
   accept,
   description,
   value,
-  onChange,
+  onUploadComplete,
   type
 }: BeatUploadZoneProps) {
   const [isUploading, setIsUploading] = React.useState(false)
   const [progress, setProgress] = React.useState(0)
+  const [uploadError, setUploadError] = React.useState<string | null>(null)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     setIsUploading(true)
     setProgress(0)
+    setUploadError(null)
 
-    // Determine target upload endpoint and matching form parameter field
-    let endpoint = "http://localhost:5000/api/uploads/upload-audio"
-    let fieldName = "audio"
-    
-    if (type === "image") {
-      endpoint = "http://localhost:5000/api/uploads/upload-image"
-      fieldName = "image"
-    } else if (type === "document") {
-      endpoint = "http://localhost:5000/api/uploads/upload-document"
-      fieldName = "document"
+    let calculatedDuration: number | undefined = undefined
+    if (type === "audio") {
+      try {
+        calculatedDuration = await new Promise<number>((resolve) => {
+          const audio = new Audio()
+          audio.src = URL.createObjectURL(file)
+          audio.addEventListener("loadedmetadata", () => {
+            resolve(Math.round(audio.duration))
+          })
+          audio.addEventListener("error", () => {
+            resolve(0)
+          })
+        })
+      } catch (err) {
+        console.error("Failed to calculate duration:", err)
+      }
     }
 
-    const formData = new FormData()
-    formData.append(fieldName, file)
-
-    const xhr = new XMLHttpRequest()
-    xhr.open("POST", endpoint, true)
-
-    // Track real network upload progress percentage
-    xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percentage = Math.round((event.loaded / event.total) * 100)
+    try {
+      const response = await uploadFile(file, type, (percentage) => {
         setProgress(percentage)
-      }
-    }
-
-    xhr.onload = () => {
+      })
       setIsUploading(false)
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const response = JSON.parse(xhr.responseText)
-          // Store the generated unique filename in form state
-          onChange(response.fileName)
-        } catch (err) {
-          console.error("Failed to parse server upload response:", err)
-          alert("Failed to parse upload response from server.")
-        }
-      } else {
-        try {
-          const errorResp = JSON.parse(xhr.responseText)
-          alert(`Upload failed: ${errorResp.error || errorResp.message || "Unknown error"}`)
-        } catch {
-          alert(`Upload failed with status code ${xhr.status}`)
-        }
-      }
-    }
-
-    xhr.onerror = () => {
+      onUploadComplete(response.fileName, calculatedDuration)
+    } catch (err: any) {
       setIsUploading(false)
-      alert("Network error occurred. Please ensure the backend server is running on port 5000.")
+      console.error("Upload error:", err)
+      const errorMsg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Unknown error"
+      setUploadError(errorMsg)
     }
-
-    xhr.send(formData)
   }
 
   const triggerUpload = () => {
@@ -97,6 +78,15 @@ export function BeatUploadZone({
     if (type === "audio") return <Music size={28} className="text-neutral-400" />
     return <FileText size={28} className="text-neutral-400" />
   }
+
+  const getDisplayValue = (val: string) => {
+    if (!val) return "";
+    if (val.includes("/beats/object/")) {
+      const decoded = decodeURIComponent(val);
+      return decoded.split("/beats/object/").pop() || val;
+    }
+    return val;
+  };
 
   return (
     <div className="space-y-2">
@@ -134,14 +124,14 @@ export function BeatUploadZone({
               <Check size={20} />
             </div>
             <div className="text-xs font-semibold text-neutral-200">Upload Complete</div>
-            <div className="text-[10px] text-neutral-500 max-w-[250px] truncate font-mono">{value}</div>
+            <div className="text-[10px] text-neutral-500 max-w-[250px] truncate font-mono">{getDisplayValue(value)}</div>
             <Button 
               type="button"
               variant="outline" 
               size="sm" 
               onClick={(e) => {
                 e.stopPropagation()
-                onChange("")
+                onUploadComplete("")
               }}
               className="h-7 text-xs px-2 mt-1 border-red-500/10 text-red-400 hover:bg-red-500/5 hover:border-red-500/20 hover:text-red-300"
             >
@@ -157,6 +147,11 @@ export function BeatUploadZone({
               <span className="font-semibold text-primary">Click to upload</span> or drag and drop
             </div>
             <div className="text-[10px] text-neutral-500">{description}</div>
+            {uploadError && (
+              <div className="text-[10px] text-red-400 font-semibold mt-1 max-w-[250px] break-words">
+                Upload failed: {uploadError}
+              </div>
+            )}
           </div>
         )}
       </div>

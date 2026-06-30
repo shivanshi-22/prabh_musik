@@ -6,7 +6,7 @@ import Link from "next/link"
 import { ArrowLeft, Edit, Copy, Trash2, FileText, Download, Music, Disc3 } from "lucide-react"
 
 import { useBeat, useDeleteBeat, useDuplicateBeat } from "../../../../hooks/useBeats"
-import { mockArtists } from "../../../../mock/artists"
+import { useArtists } from "../../../../hooks/useArtists"
 import { PageHeader } from "../../../../components/admin/PageHeader"
 import { Button } from "../../../../components/ui/button"
 import { StatusBadge } from "../../../../components/admin/StatusBadge"
@@ -25,25 +25,47 @@ export default function BeatDetailPage() {
   const beatId = Array.isArray(id) ? id[0] : id
 
   const { data: beat, isLoading, error } = useBeat(beatId || "")
+  const { data: artists = [] } = useArtists()
+
+  React.useEffect(() => {
+    if (beat) {
+      console.log("Beat:", beat);
+      console.log("Preview URL:", beat.assets?.previewAudio);
+      console.log("Cover URL:", beat.assets?.coverImage);
+    }
+  }, [beat])
+
   const deleteBeatMutation = useDeleteBeat()
   const duplicateBeatMutation = useDuplicateBeat()
 
   const [isDeleteOpen, setIsDeleteOpen] = React.useState(false)
+  const [actionError, setActionError] = React.useState<string | null>(null)
 
   const handleDuplicate = () => {
     if (!beatId) return
+    setActionError(null)
     duplicateBeatMutation.mutate(beatId, {
       onSuccess: () => {
         router.push("/admin/beats")
+      },
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Failed to duplicate track"
+        setActionError(msg)
       }
     })
   }
 
   const handleDelete = () => {
     if (!beatId) return
+    setActionError(null)
     deleteBeatMutation.mutate(beatId, {
       onSuccess: () => {
         router.push("/admin/beats")
+      },
+      onError: (err: any) => {
+        setIsDeleteOpen(false)
+        const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Failed to delete track"
+        setActionError(msg)
       }
     })
   }
@@ -74,7 +96,7 @@ export default function BeatDetailPage() {
     )
   }
 
-  const artist = mockArtists.find(a => a.id === beat.artistId)
+  const artist = artists.find(a => a.id === beat.artistId)
 
   return (
     <div className="relative space-y-8 animate-in fade-in duration-500">
@@ -123,11 +145,32 @@ export default function BeatDetailPage() {
         </div>
       </div>
 
+      {actionError && (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-400 font-medium flex items-center justify-between animate-in fade-in duration-200">
+          <span>⚠️ {actionError}</span>
+          <button onClick={() => setActionError(null)} className="text-red-400/60 hover:text-red-300 text-xs font-semibold">Dismiss</button>
+        </div>
+      )}
+
       {/* Cover and details header panel */}
       <div className="flex flex-col md:flex-row items-center md:items-start gap-6 border-b border-card-border pb-8">
-        <div className="h-32 w-32 rounded-xl bg-neutral-900 border border-card-border overflow-hidden flex items-center justify-center shrink-0 shadow-lg shadow-black/30">
+        <div className="relative h-32 w-32 rounded-xl bg-neutral-900 border border-card-border overflow-hidden flex items-center justify-center shrink-0 shadow-lg shadow-black/30">
           {beat.assets.coverImage ? (
-            <img src={beat.assets.coverImage} alt="Cover" className="h-full w-full object-cover" />
+            <>
+              <img 
+                src={beat.assets.coverImage} 
+                alt="Cover" 
+                className="h-full w-full object-cover" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = "none";
+                  const fallbackEl = (e.target as HTMLImageElement).nextElementSibling as HTMLElement;
+                  if (fallbackEl) fallbackEl.style.display = "flex";
+                }}
+              />
+              <div style={{ display: "none" }} className="h-full w-full flex items-center justify-center bg-gradient-to-br from-neutral-900 to-neutral-800">
+                <Disc3 size={40} className="text-neutral-600" />
+              </div>
+            </>
           ) : (
             <Disc3 size={40} className="text-neutral-600" />
           )}
@@ -139,7 +182,7 @@ export default function BeatDetailPage() {
               <StatusBadge status={beat.status} />
             </div>
           </div>
-          <p className="text-neutral-400 text-sm font-semibold">By {artist ? artist.stageName : "Unknown Artist"}</p>
+          <p className="text-neutral-400 text-sm font-semibold">By {artist ? artist.stageName : "Prabh Musik"}</p>
           {beat.description && (
             <p className="text-neutral-500 text-sm max-w-2xl pt-1 leading-relaxed">{beat.description}</p>
           )}
@@ -154,6 +197,7 @@ export default function BeatDetailPage() {
             <BeatAudioPlayer 
               audioUrl={beat.assets.previewAudio} 
               title={beat.title} 
+              initialDuration={beat.duration}
             />
           )}
 
