@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getOrders, getOrderById, createOrder, updateOrderStatus, deleteOrder } from "../services/order.service";
+import { getOrders, getOrderById, createOrder, updateOrder, updateOrderStatus, deleteOrder } from "../services/order.service";
 import { Order } from "../types/admin";
 
 export const useOrders = () => {
@@ -23,6 +23,21 @@ export const useCreateOrder = () => {
     mutationFn: (orderData: Omit<Order, 'id' | 'createdAt'>) => createOrder(orderData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "beats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "ownerships"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "artists"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboardMetrics"] });
+    }
+  });
+};
+
+export const useUpdateOrder = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<Order> }) => updateOrder(id, updates),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "orders", data.id] });
       queryClient.invalidateQueries({ queryKey: ["admin", "beats"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "ownerships"] });
       queryClient.invalidateQueries({ queryKey: ["admin", "artists"] });

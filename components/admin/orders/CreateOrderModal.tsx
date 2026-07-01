@@ -25,6 +25,8 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
   const [status, setStatus] = React.useState<'PENDING' | 'COMPLETED'>("COMPLETED")
   const [customPrice, setCustomPrice] = React.useState("")
 
+  const [error, setError] = React.useState<string | null>(null)
+
   // Filter customers & available beats
   const customers = React.useMemo(() => users.filter(u => u.role === 'customer'), [users])
   const availableBeats = React.useMemo(() => beats.filter(b => b.status === 'AVAILABLE'), [beats])
@@ -56,6 +58,7 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!customerId || selectedBeatIds.length === 0 || !customPrice) return
+    setError(null)
 
     createOrderMutation.mutate({
       customerId,
@@ -72,6 +75,10 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
         setStatus("COMPLETED")
         setCustomPrice("")
         onClose()
+      },
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Failed to create order"
+        setError(msg)
       }
     })
   }
@@ -88,6 +95,13 @@ export function CreateOrderModal({ isOpen, onClose }: CreateOrderModalProps) {
             <X size={20} />
           </button>
         </div>
+
+        {error && (
+          <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-400 font-medium flex items-center justify-between animate-in fade-in duration-200">
+            <span>⚠️ {error}</span>
+            <button onClick={() => setError(null)} className="text-red-400/60 hover:text-red-300 text-xs font-semibold">Dismiss</button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Customer Choice */}

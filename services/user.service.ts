@@ -1,42 +1,66 @@
-import { localUsers, logActivity } from './db';
+import api from '../lib/api';
 import { User } from '../types/admin';
 
+export interface BackendUser {
+  id: number;
+  name: string;
+  mobile: string | null;
+  email: string;
+  role: 'admin' | 'customer';
+  status: 'active' | 'blocked';
+  address: string | null;
+  beats_buy: number;
+  user_created_date: string;
+  last_purchase_date: string | null;
+  last_login_time: string | null;
+}
+
+export function mapBackendToFrontend(user: BackendUser): User {
+  return {
+    id: String(user.id),
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    createdAt: user.user_created_date,
+    status: user.status === 'blocked' ? 'BLOCKED' : 'ACTIVE',
+    mobile: user.mobile || undefined,
+    address: user.address || undefined,
+    lastLogin: user.last_login_time || undefined,
+    avatar: undefined
+  };
+}
+
 export async function getUsers(): Promise<User[]> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return [...localUsers];
+  const response = await api.get<{ success: boolean; data: BackendUser[] }>('/users');
+  return response.data.data.map(mapBackendToFrontend);
 }
 
 export async function getUserById(id: string): Promise<User | undefined> {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 200));
-  return localUsers.find(user => user.id === id);
+  if (!id) return undefined;
+  const response = await api.get<{ success: boolean; data: BackendUser }>(`/users/${id}`);
+  return mapBackendToFrontend(response.data.data);
+}
+
+export async function createUser(userData: any): Promise<User> {
+  const response = await api.post<{ success: boolean; data: BackendUser }>('/users', userData);
+  return mapBackendToFrontend(response.data.data);
+}
+
+export async function updateUser(id: string, updates: any): Promise<User> {
+  const response = await api.put<{ success: boolean; data: BackendUser }>(`/users/${id}`, updates);
+  return mapBackendToFrontend(response.data.data);
 }
 
 export async function blockUser(id: string): Promise<User> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  
-  const user = localUsers.find(u => u.id === id);
-  if (!user) {
-    throw new Error(`Customer with ID ${id} not found`);
-  }
-
-  user.status = 'BLOCKED';
-  logActivity(`Customer ${user.name} was BLOCKED by administrator`, 'system');
-  
-  return user;
+  const response = await api.patch<{ success: boolean; data: BackendUser }>(`/users/${id}/status`, {
+    status: 'blocked'
+  });
+  return mapBackendToFrontend(response.data.data);
 }
 
 export async function unblockUser(id: string): Promise<User> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  
-  const user = localUsers.find(u => u.id === id);
-  if (!user) {
-    throw new Error(`Customer with ID ${id} not found`);
-  }
-
-  user.status = 'ACTIVE';
-  logActivity(`Customer ${user.name} was UNBLOCKED by administrator`, 'system');
-  
-  return user;
+  const response = await api.patch<{ success: boolean; data: BackendUser }>(`/users/${id}/status`, {
+    status: 'active'
+  });
+  return mapBackendToFrontend(response.data.data);
 }

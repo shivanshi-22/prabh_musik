@@ -69,6 +69,11 @@ console.log("DB MODULE:", db);
 
 const beatsRouter = require("./modules/beats/beats.routes");
 const uploadsRouter = require("./modules/uploads/uploads.routes");
+const usersRouter = require("./modules/users/users.routes");
+const ordersRouter = require("./modules/orders/orders.routes");
+const ownershipsRouter = require("./modules/ownerships/ownerships.routes");
+const downloadsRouter = require("./modules/downloads/downloads.routes");
+const ownershipsController = require("./modules/ownerships/ownerships.controller");
 
 const app = express();
 
@@ -93,6 +98,11 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/uploads", uploadsRouter);
 app.use("/api/beats", beatsRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/orders", ordersRouter);
+app.use("/api/ownerships", ownershipsRouter);
+app.use("/api/downloads", downloadsRouter);
+app.get("/api/me/library", ownershipsController.getLibraryByUser);
 
 app.use((err, req, res, next) => {
   console.error(err);

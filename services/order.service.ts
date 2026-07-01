@@ -1,128 +1,93 @@
-import { localOrders, localOwnerships, localBeats, localUsers, logActivity } from './db';
-import { Order, Ownership } from '../types/admin';
+import api from '../lib/api';
+import { Order } from '../types/admin';
+
+export interface BackendOrder {
+  id: number;
+  customer: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  totalAmount: number;
+  paymentMethod: string;
+  status: 'pending' | 'paid' | 'failed' | 'refunded' | 'cancelled';
+  createdAt: string;
+  updatedAt: string;
+  items: {
+    beatId: number;
+    title: string;
+    price: number;
+    licenseType: string;
+  }[];
+}
+
+export function mapBackendToFrontend(order: BackendOrder): Order {
+  let status: Order['status'] = 'PENDING';
+  if (order.status === 'paid') {
+    status = 'COMPLETED';
+  } else if (order.status === 'failed') {
+    status = 'FAILED';
+  } else if (order.status === 'refunded') {
+    status = 'REFUNDED';
+  }
+
+  return {
+    id: String(order.id),
+    customerId: String(order.customer.id),
+    beatIds: order.items.map(item => String(item.beatId)),
+    totalAmount: order.totalAmount,
+    status,
+    createdAt: order.createdAt,
+    paymentMethod: order.paymentMethod
+  };
+}
 
 export async function getOrders(): Promise<Order[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  return [...localOrders];
+  const response = await api.get<{ success: boolean; data: BackendOrder[] }>('/orders');
+  return response.data.data.map(mapBackendToFrontend);
 }
 
 export async function getOrderById(id: string): Promise<Order | undefined> {
-  await new Promise((resolve) => setTimeout(resolve, 150));
-  return localOrders.find(order => order.id === id);
-}
-
-// Purchase Workflow Action: Create Ownership records for order items
-function processCompletedOrderItems(order: Order) {
-  const customer = localUsers.find(u => u.id === order.customerId);
-  const customerName = customer ? customer.name : 'Customer';
-
-  order.beatIds.forEach(beatId => {
-    const beat = localBeats.find(b => b.id === beatId);
-    const beatTitle = beat ? beat.title : 'Beat';
-    const pricePaid = beat ? beat.price : 0;
-
-    // 1. Create ownership record if not already exists
-    const exists = localOwnerships.some(own => own.beatId === beatId && own.customerId === order.customerId);
-    if (!exists) {
-      const newOwnership: Ownership = {
-        id: `own_${Math.random().toString(36).substr(2, 9)}`,
-        beatId,
-        customerId: order.customerId,
-        licenseType: 'exclusive', // Exclusive license only
-        purchasedAt: new Date().toISOString(),
-        pricePaid: pricePaid,
-        transactionId: `txn_${Math.floor(100000000 + Math.random() * 900000000)}`
-      };
-      localOwnerships.push(newOwnership);
-
-      // Log ownership assignments
-      logActivity(`Ownership license assigned for "${beatTitle}" to customer ${customerName}`, 'ownership');
-      logActivity(`Beat "${beatTitle}" marked as SOLD`, 'beat');
-    }
-  });
-}
-
-// Refund Workflow Action: Remove ownership records for order items
-function processRefundedOrderItems(order: Order) {
-  order.beatIds.forEach(beatId => {
-    const beat = localBeats.find(b => b.id === beatId);
-    const beatTitle = beat ? beat.title : 'Beat';
-
-    // 1. Delete the ownership record matching this customer & beat
-    const initialLen = localOwnerships.length;
-    const index = localOwnerships.findIndex(own => own.beatId === beatId && own.customerId === order.customerId);
-    if (index !== -1) {
-      localOwnerships.splice(index, 1);
-      
-      logActivity(`Ownership revoked for "${beatTitle}" due to order refund`, 'ownership');
-      logActivity(`Beat "${beatTitle}" marked as AVAILABLE`, 'beat');
-    }
-  });
+  if (!id) return undefined;
+  const response = await api.get<{ success: boolean; data: BackendOrder }>(`/orders/${id}`);
+  return mapBackendToFrontend(response.data.data);
 }
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt'>): Promise<Order> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
+  const status = orderData.status === 'COMPLETED' ? 'paid' : orderData.status.toLowerCase();
+  
+  const response = await api.post<{ success: boolean; data: BackendOrder }>('/orders', {
+    customerId: parseInt(orderData.customerId, 10),
+    beatIds: orderData.beatIds.map(id => parseInt(id, 10)),
+    paymentMethod: orderData.paymentMethod,
+    status
+  });
+  return mapBackendToFrontend(response.data.data);
+}
 
-  const newOrder: Order = {
-    ...orderData,
-    id: `ord_${Math.floor(1000 + Math.random() * 9000)}`,
-    createdAt: new Date().toISOString()
-  };
-
-  localOrders.push(newOrder);
-
-  // Log order creation
-  const customer = localUsers.find(u => u.id === newOrder.customerId);
-  const customerName = customer ? customer.name : 'Customer';
-  logActivity(`Order #${newOrder.id} logged as ${newOrder.status} for customer ${customerName} ($${newOrder.totalAmount.toFixed(2)})`, 'order');
-
-  // Trigger side effects if order is COMPLETED
-  if (newOrder.status === 'COMPLETED') {
-    processCompletedOrderItems(newOrder);
+export async function updateOrder(id: string, updates: Partial<Order>): Promise<Order> {
+  const payload: any = {};
+  if (updates.paymentMethod !== undefined) {
+    payload.paymentMethod = updates.paymentMethod;
   }
-
-  return newOrder;
+  if (updates.status !== undefined) {
+    payload.status = updates.status === 'COMPLETED' ? 'paid' : updates.status.toLowerCase();
+  }
+  
+  const response = await api.put<{ success: boolean; data: BackendOrder }>(`/orders/${id}`, payload);
+  return mapBackendToFrontend(response.data.data);
 }
 
 export async function updateOrderStatus(id: string, status: Order['status']): Promise<Order> {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-
-  const orderIndex = localOrders.findIndex(o => o.id === id);
-  if (orderIndex === -1) {
-    throw new Error(`Order with ID ${id} not found`);
-  }
-
-  const oldStatus = localOrders[orderIndex].status;
-  localOrders[orderIndex].status = status;
-  const updatedOrder = localOrders[orderIndex];
-
-  // Log status change
-  logActivity(`Order #${id} status changed from ${oldStatus} to ${status}`, 'order');
-
-  // Handle business flows
-  if (status === 'COMPLETED' && oldStatus !== 'COMPLETED') {
-    processCompletedOrderItems(updatedOrder);
-  } else if (status === 'REFUNDED' && oldStatus === 'COMPLETED') {
-    processRefundedOrderItems(updatedOrder);
-  }
-
-  return updatedOrder;
+  const backendStatus = status === 'COMPLETED' ? 'paid' : status.toLowerCase();
+  
+  const response = await api.patch<{ success: boolean; data: BackendOrder }>(`/orders/${id}/status`, {
+    status: backendStatus
+  });
+  return mapBackendToFrontend(response.data.data);
 }
 
 export async function deleteOrder(id: string): Promise<boolean> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  const index = localOrders.findIndex(o => o.id === id);
-  if (index === -1) return false;
-
-  const order = localOrders[index];
-  
-  // If it was completed, we revoke items first
-  if (order.status === 'COMPLETED') {
-    processRefundedOrderItems(order);
-  }
-
-  localOrders.splice(index, 1);
-  logActivity(`Order #${id} deleted/cancelled by administrator`, 'system');
+  await api.delete<{ success: boolean }>(`/orders/${id}`);
   return true;
 }

@@ -18,11 +18,14 @@ VALUES
 );
 
 -- Seed a beat (using R2 key naming conventions instead of absolute URLs, providing unique slugs)
-INSERT INTO beats (beat_name, slug, genre, audio_key, status)
+INSERT INTO beats (beat_name, slug, genre, audio_key, status, price, duration, track_type)
 VALUES (
     'The Mountain Storytelling',
     'the-mountain-storytelling',
     'Storytelling',
     '1780414576089-the_mountain-storytelling-audio-136105.mp3',
-    'published'
+    'published',
+    149.99,
+    180,
+    'exclusive'
 );

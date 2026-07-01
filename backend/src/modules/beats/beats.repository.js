@@ -269,11 +269,32 @@ const archiveBeat = async (id) => {
   return result.changes > 0;
 };
 
+/**
+ * Updates selling_status of a beat, optionally using transaction context tx
+ */
+const updateSellingStatus = async (beatId, sellingStatus, tx) => {
+  const sql = `
+    UPDATE beats
+    SET 
+      selling_status = ?,
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `;
+  const conn = tx || db;
+  return new Promise((resolve, reject) => {
+    conn.run(sql, [sellingStatus, beatId], function (err) {
+      if (err) reject(err);
+      else resolve(this.changes > 0);
+    });
+  });
+};
+
 module.exports = {
   createBeat,
   getBeatById,
   existsBySlug,
   getAllBeats,
   updateBeat,
-  archiveBeat
+  archiveBeat,
+  updateSellingStatus
 };

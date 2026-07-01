@@ -27,16 +27,29 @@ export function OrderTable({ orders }: OrderTableProps) {
 
   const [orderToDelete, setOrderToDelete] = React.useState<string | null>(null)
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
 
   const handleDeleteConfirm = () => {
     if (orderToDelete) {
-      deleteOrderMutation.mutate(orderToDelete)
+      setError(null)
+      deleteOrderMutation.mutate(orderToDelete, {
+        onError: (err: any) => {
+          const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Failed to delete order"
+          setError(msg)
+        }
+      })
       setOrderToDelete(null)
     }
   }
 
   const handleUpdateStatus = (id: string, status: Order['status']) => {
-    updateStatusMutation.mutate({ id, status })
+    setError(null)
+    updateStatusMutation.mutate({ id, status }, {
+      onError: (err: any) => {
+        const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Failed to update order status"
+        setError(msg)
+      }
+    })
     setActiveDropdownId(null)
   }
 
@@ -197,6 +210,12 @@ export function OrderTable({ orders }: OrderTableProps) {
 
   return (
     <>
+      {error && (
+        <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-400 font-medium flex items-center justify-between animate-in fade-in duration-200">
+          <span>⚠️ {error}</span>
+          <button onClick={() => setError(null)} className="text-red-400/60 hover:text-red-300 text-xs font-semibold">Dismiss</button>
+        </div>
+      )}
       <DataTable columns={columns} data={orders} />
 
       <ConfirmDialog

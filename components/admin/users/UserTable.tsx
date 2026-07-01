@@ -25,14 +25,21 @@ export function UserTable({ users }: UserTableProps) {
   const unblockMutation = useUnblockUser()
 
   const [activeDropdownId, setActiveDropdownId] = React.useState<string | null>(null)
+  const [actionError, setActionError] = React.useState<string | null>(null)
 
   const handleBlockToggle = (id: string, isBlocked: boolean) => {
-    if (isBlocked) {
-      unblockMutation.mutate(id)
-    } else {
-      blockMutation.mutate(id)
-    }
-    setActiveDropdownId(null)
+    setActionError(null)
+    const mutation = isBlocked ? unblockMutation : blockMutation
+    mutation.mutate(id, {
+      onSuccess: () => {
+        setActiveDropdownId(null)
+      },
+      onError: (err: any) => {
+        setActiveDropdownId(null)
+        const msg = err?.response?.data?.error || err?.response?.data?.message || err?.message || "Failed to update user status"
+        setActionError(msg)
+      }
+    })
   }
 
   const columns: ColumnDef<User>[] = [
@@ -178,6 +185,14 @@ export function UserTable({ users }: UserTableProps) {
   const customersOnly = users.filter(u => u.role !== 'admin')
 
   return (
-    <DataTable columns={columns} data={customersOnly} />
+    <>
+      {actionError && (
+        <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3.5 text-sm text-red-400 font-medium flex items-center justify-between animate-in fade-in duration-200">
+          <span>⚠️ {actionError}</span>
+          <button onClick={() => setActionError(null)} className="text-red-400/60 hover:text-red-300 text-xs font-semibold">Dismiss</button>
+        </div>
+      )}
+      <DataTable columns={columns} data={customersOnly} />
+    </>
   )
 }
